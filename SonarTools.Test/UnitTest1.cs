@@ -63,7 +63,7 @@ namespace SonarTools.Test {
             XElement xmlTree = XElement.Parse(text);
             VcxprojParser parser = new VcxprojParser();
             List<String> dirs = new List<string>();
-            parser.GetAdditionalIncludeDirectories(xmlTree, dirs);
+            parser.AddAdditionalIncludeDirectories(xmlTree, dirs);
 
             // Assert
             Assert.AreEqual(3, dirs.Count);
@@ -77,13 +77,13 @@ namespace SonarTools.Test {
             Project proj = new Project();
             proj.SetProperty("P1", "Property 1;Property 2");
 
-            VcxprojParser parser = new VcxprojParser();
+            VcxprojParser parser = new VcxprojParser(proj);
             List<String> rawPaths = new List<string> {
                 "1234",
                 "$(P1)"
             };
 
-            var paths = parser.EvaluateDirectories(proj, rawPaths);
+            var paths = parser.EvaluateDirectories(rawPaths);
 
             Assert.AreEqual(3, paths.Count);
             Assert.AreEqual("1234", paths[0]);
@@ -97,12 +97,12 @@ namespace SonarTools.Test {
             proj.SetProperty("P1", "Property 1");
             proj.SetProperty("P2", "Property 2");
 
-            VcxprojParser parser = new VcxprojParser();
+            VcxprojParser parser = new VcxprojParser(proj);
             List<String> rawPaths = new List<string> {
                 @"$(P1)\$(P2)\$(P1)"
             };
 
-            var paths = parser.EvaluateDirectories(proj, rawPaths);
+            var paths = parser.EvaluateDirectories(rawPaths);
 
             Assert.AreEqual(1, paths.Count);
             Assert.AreEqual(@"Property 1\Property 2\Property 1", paths[0]);

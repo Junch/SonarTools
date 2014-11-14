@@ -12,11 +12,35 @@ using System.Xml.Linq;
 namespace SonarTools {
     public class VcxprojParser {
 
-        public IEnumerable<string> GetIncludeDirectories() {
-            throw new NotImplementedException();
+        public Project project { get; set; }
+
+        public VcxprojParser() {
         }
 
-        public void GetAdditionalIncludeDirectories(XElement xmlTree, IList<String> dirs) {
+        public VcxprojParser(Project project) {
+            this.project = project;
+        }
+
+        public IEnumerable<string> IncludeDirectories {
+            get {
+                List<String> unevaluatedPaths = GetAdditionalIncludeDirectories();
+                var evaluatedPaths = EvaluateDirectories(unevaluatedPaths);
+
+                AddIncludeDirectoriesFromEnv(evaluatedPaths);
+                return evaluatedPaths.Distinct();
+            }
+        }
+
+        private void AddIncludeDirectoriesFromEnv(IList<String> dirs) {
+            ProjectProperty includeEnv = project.GetProperty("Include");
+            if (includeEnv != null) {
+                String[] paths = includeEnv.EvaluatedValue.Split(';');
+                foreach (String path in paths)
+                    dirs.Add(path);
+            }
+        }
+
+        public void AddAdditionalIncludeDirectories(XElement xmlTree, IList<String> dirs) {
             XNamespace ns = xmlTree.Name.Namespace;
             var query = xmlTree.Elements(ns + "ItemDefinitionGroup").
                     Elements(ns + "ClCompile").
@@ -29,17 +53,21 @@ namespace SonarTools {
             }
         }
 
-        public void GetAdditionalIncludeDirectories(Project project, IList<String> dirs) {
-            XElement xmlTree = XElement.Parse(project.Xml.RawXml);
-            GetAdditionalIncludeDirectories(xmlTree, dirs);
+        public List<String> GetAdditionalIncludeDirectories() {
+            List<String> dirs = new List<string>();
+            
+            XElement xmlTree = XElement.Parse(project.Xml.RawXml);         
+            AddAdditionalIncludeDirectories(xmlTree, dirs);
 
             foreach (var e in project.Imports) {
                 xmlTree = XElement.Load(e.ImportedProject.FullPath);
-                GetAdditionalIncludeDirectories(xmlTree, dirs);
+                AddAdditionalIncludeDirectories(xmlTree, dirs);
             }
+
+            return dirs;
         }
 
-        public List<String> EvaluateDirectories(Project project, IList<String> dirs) {
+        public List<String> EvaluateDirectories(IList<String> dirs) {
             List<String> paths = new List<String>();
 
             foreach (var x in dirs.Distinct()) {
@@ -65,6 +93,5 @@ namespace SonarTools {
 
             return paths;
         }
-
     }
 }
