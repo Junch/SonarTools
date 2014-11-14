@@ -43,28 +43,24 @@ namespace SonarTools {
             List<String> paths = new List<String>();
 
             foreach (var x in dirs.Distinct()) {
+                String xx = x.Clone() as String;
+
                 Regex regex = new Regex(@"\$\(.*?\)");
-                if (!regex.IsMatch(x)) {
-                    paths.Add(x);
-                } else {
-                    Match match = regex.Match(x);
-                    String xx = x.Clone() as String;
-
-                    while(match.Success) {
-                        String val = match.Value;
-                        String env = val.Substring(2, val.Length - 3);
-                        ProjectProperty prop = project.GetProperty(env);
-                        if (prop != null) {
-                            String pattern = String.Format(@"\$\({0}\)", env);
-                            xx = Regex.Replace(xx, pattern, prop.EvaluatedValue);
-                        }
-
-                        match = match.NextMatch();
+                Match match = regex.Match(x);
+                while (match.Success) {
+                    String val = match.Value;
+                    String env = val.Substring(2, val.Length - 3);
+                    ProjectProperty prop = project.GetProperty(env);
+                    if (prop != null) {
+                        String pattern = String.Format(@"\$\({0}\)", env);
+                        xx = Regex.Replace(xx, pattern, prop.EvaluatedValue);
                     }
 
-                    foreach (String path in xx.Split(';'))
-                        paths.Add(path);
+                    match = match.NextMatch();
                 }
+
+                foreach (String path in xx.Split(';'))
+                    paths.Add(path);
             }
 
             return paths;
