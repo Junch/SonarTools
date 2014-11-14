@@ -39,7 +39,7 @@ namespace SonarTools {
             String dirName = System.IO.Path.GetDirectoryName(proj.FullPath);
             String cppcheckReportpath = keyName + ".xml";
 
-            RunnerConfig cfg = new RunnerConfig() { ProjectName = proj.FullPath};
+            RunnerConfig cfg = new RunnerConfig(proj.FullPath);
             cfg["SourceEncoding"] = "UTF-8";
             cfg["ProjectVersion"] = Version;
             cfg["ProjectName"] = DepotName(proj.FullPath);

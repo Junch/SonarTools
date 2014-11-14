@@ -10,11 +10,11 @@ namespace SonarTools.Test {
     public class UnitTest1 {
         [TestMethod]
         public void Generate_Setting_From_Properties() {
-            RunnerConfig config = new RunnerConfig ();
+            RunnerConfig config = new RunnerConfig(null);
             config["ProjectName"] = "Simple example";
             config["SourceEncoding"] = "UTF-8";
             config["Language"] = "c++";
-            var setting = config.GetSettings();
+            var setting = config.GetProperties();
             setting.Sort();
 
             Assert.AreEqual(3, setting.Count);
@@ -26,7 +26,7 @@ namespace SonarTools.Test {
 
         [TestMethod]
         public void Generate_sonarcmd_From_Properties() {
-            RunnerConfig config = new RunnerConfig();
+            RunnerConfig config = new RunnerConfig(null);
             config["SourceEncoding"] = "UTF-8";
             config["Language"] = "c++";
 

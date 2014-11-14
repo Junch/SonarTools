@@ -9,22 +9,24 @@ namespace SonarTools
 {
     public class RunnerConfig {
         private Dictionary<String, String> properties = new Dictionary<String, String>();
-
         public String ProjectName { get; set; }
+
+        public RunnerConfig(String ProjectName) {
+            this.ProjectName = ProjectName;
+        }
 
         public PluginType type { get; set; }
 
         public String CppCheckCmd {
             get {
                 String folder = System.IO.Path.GetDirectoryName(ProjectName);
-
                 return String.Format("cppcheck.exe -j 8 {0} --xml 2>{1}.xml", folder, this["ProjectKey"]);
             } 
         }
 
         public String SonarCmd {
             get {
-                String setting = String.Join(" ", GetSettings());
+                String setting = String.Join(" ", GetProperties());
                 return "sonar-runner " + setting;
             }
         }
@@ -39,7 +41,7 @@ namespace SonarTools
             }
         }
 
-        public List<String> GetSettings () {
+        public List<String> GetProperties () {
             var type = typeof(RunnerConfig);
             PropertyInfo[] pi= type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
 
