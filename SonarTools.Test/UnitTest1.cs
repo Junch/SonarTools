@@ -3,6 +3,7 @@ using System.Xml;
 using System.Xml.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using Microsoft.Build.Evaluation;
 
 namespace SonarTools.Test {
     [TestClass]
@@ -47,7 +48,7 @@ namespace SonarTools.Test {
               <ItemDefinitionGroup Condition=""'$(Configuration)|$(Platform)'=='Debug|Win32'"">
                 <ClCompile>
                   <WarningLevel>Level3</WarningLevel>
-                  <AdditionalIncludeDirectories>C:\Test\Include</AdditionalIncludeDirectories>
+                  <AdditionalIncludeDirectories>C:\Test\Include;$(Macro)</AdditionalIncludeDirectories>
                 </ClCompile>
               </ItemDefinitionGroup>
               <ItemDefinitionGroup Condition=""'$(Configuration)|$(Platform)'=='Release|Win32'"">
@@ -62,12 +63,49 @@ namespace SonarTools.Test {
             XElement xmlTree = XElement.Parse(text);
             VcxprojParser parser = new VcxprojParser();
             List<String> dirs = new List<string>();
-            parser.getAdditionalIncludeDirectories(xmlTree, dirs);
+            parser.GetAdditionalIncludeDirectories(xmlTree, dirs);
 
             // Assert
-            Assert.AreEqual(2, dirs.Count);
+            Assert.AreEqual(3, dirs.Count);
             Assert.AreEqual(@"C:\Test\Include", dirs[0]);
-            Assert.AreEqual(@"D:\Test\Include", dirs[1]);
+            Assert.AreEqual(@"$(Macro)", dirs[1]);
+            Assert.AreEqual(@"D:\Test\Include", dirs[2]);
+        }
+
+        [TestMethod]
+        public void Replace_One_Macro_InPaths() {
+            Project proj = new Project();
+            proj.SetProperty("P1", "Property 1;Property 2");
+
+            VcxprojParser parser = new VcxprojParser();
+            List<String> rawPaths = new List<string> {
+                "1234",
+                "$(P1)"
+            };
+
+            var paths = parser.EvaluateDirectories(proj, rawPaths);
+
+            Assert.AreEqual(3, paths.Count);
+            Assert.AreEqual("1234", paths[0]);
+            Assert.AreEqual("Property 1", paths[1]);
+            Assert.AreEqual("Property 2", paths[2]);
+        }
+
+        [TestMethod]
+        public void Replace_Two_Macro_InPaths() {
+            Project proj = new Project();
+            proj.SetProperty("P1", "Property 1");
+            proj.SetProperty("P2", "Property 2");
+
+            VcxprojParser parser = new VcxprojParser();
+            List<String> rawPaths = new List<string> {
+                @"$(P1)\$(P2)\$(P1)"
+            };
+
+            var paths = parser.EvaluateDirectories(proj, rawPaths);
+
+            Assert.AreEqual(1, paths.Count);
+            Assert.AreEqual(@"Property 1\Property 2\Property 1", paths[0]);
         }
 
     }
