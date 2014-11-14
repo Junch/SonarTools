@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ParserManager.cs" />
     <Compile Include="VcxprojParser.cs" />
     <Compile Include="RunnerConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

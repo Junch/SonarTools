@@ -31,6 +31,8 @@ namespace SonarTools {
             }
         }
 
+        #region The implemenation details
+
         private void AddIncludeDirectoriesFromEnv(IList<String> dirs) {
             ProjectProperty includeEnv = project.GetProperty("Include");
             if (includeEnv != null) {
@@ -93,5 +95,6 @@ namespace SonarTools {
 
             return paths;
         }
+        #endregion
     }
 }

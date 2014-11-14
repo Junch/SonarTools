@@ -8,25 +8,34 @@ using System.Threading.Tasks;
 namespace SonarTools
 {
     public class RunnerConfig {
-        public String ProjectKey { get; set; }
+        private Dictionary<String, String> properties = new Dictionary<String, String>();
+
         public String ProjectName { get; set; }
-        public String ProjectDescription { get; set; }
-        public String ProjectVersion { get; set; }
-        public String Language { get; set; }
-        public String SourceEncoding { get; set; }
 
-        public String Include { get; set; }
-        public String Sources { get; set; }
+        public PluginType type { get; set; }
 
-        private Dictionary<String, String> additionProperties = new Dictionary<String, String>();
-        
+        public String CppCheckCmd {
+            get {
+                String folder = System.IO.Path.GetDirectoryName(ProjectName);
+
+                return String.Format("cppcheck.exe -j 8 {0} --xml 2>{1}.xml", folder, this["ProjectKey"]);
+            } 
+        }
+
+        public String SonarCmd {
+            get {
+                String setting = String.Join(" ", GetSettings());
+                return "sonar-runner " + setting;
+            }
+        }
+
         public String this [String prop]{
             set {
-                additionProperties[prop] = value;
+                properties[prop] = value;
             }
 
             get {
-                return additionProperties[prop];
+                return properties[prop];
             }
         }
 
@@ -36,20 +45,7 @@ namespace SonarTools
 
             List<String> setting = new List<string>();
 
-            foreach (var prop in pi) {
-                if (prop.GetIndexParameters().Length > 0)
-                    continue;
-
-                String value = prop.GetValue(this) as String;
-                if (String.IsNullOrEmpty(value))
-                    continue;
-
-                String propName = FirstLetterLowercase(prop.Name);
-
-                setting.Add(String.Format("-Dsonar.{0}={1}", propName, value));
-            }
-
-            foreach (var pair in additionProperties) {
+            foreach (var pair in properties) {
                 if (String.IsNullOrEmpty(pair.Value))
                     continue;
 
