@@ -10,11 +10,11 @@ namespace SonarTools.Test {
     public class UnitTest1 {
         [TestMethod]
         public void Generate_Setting_From_Properties() {
-            RunnerConfig config = new RunnerConfig(null);
+            RunnerConfig config = new RunnerConfig();
             config["ProjectName"] = "Simple example";
             config["SourceEncoding"] = "UTF-8";
             config["Language"] = "c++";
-            var setting = config.GetProperties();
+            var setting = config.GetProperties(false);
             setting.Sort();
 
             Assert.AreEqual(3, setting.Count);
@@ -26,12 +26,13 @@ namespace SonarTools.Test {
 
         [TestMethod]
         public void Generate_sonarcmd_From_Properties() {
-            RunnerConfig config = new RunnerConfig(null);
-            config["SourceEncoding"] = "UTF-8";
-            config["Language"] = "c++";
+            RunnerConfig cfg = new RunnerConfig();
+            cfg.FullFilePath = @"U:\a.vcxproj";
+            cfg.Branch = @"$/A/R";
+            cfg["Language"] = "c++";
 
-            String cmd = config.SonarCmd;
-            Assert.AreEqual("sonar-runner -Dsonar.sourceEncoding=UTF-8 -Dsonar.language=c++", cmd);
+            String cmd = cfg.SonarCmdArguments;
+            Assert.AreEqual(@"-Dsonar.language=c++ -Dsonar.fullFilePath=U:\a.vcxproj -Dsonar.projectKey=A_R_a_vcxproj -Dsonar.ProjectName=$/A/R/a.vcxproj -Dsonar.Sources=U:\", cmd);
         }
 
         [TestMethod]
@@ -105,23 +106,21 @@ namespace SonarTools.Test {
 
         [TestMethod]
         public void Get_DepotName_From_Path() {
-            ParserManager pm = new ParserManager();
-            pm.Branch = @"$/AutoCAD/M-Branches/R";
-
-            String s = @"U:\components\global\src\coredll\accore.vcxproj";
-            String r = pm.DepotName(s);
-
+            RunnerConfig cfg = new RunnerConfig();
+            cfg.FullFilePath = @"U:\components\global\src\coredll\accore.vcxproj";
+            cfg.Branch =  @"$/AutoCAD/M-Branches/R";
+ 
+            String r = cfg.DepotName;
             Assert.AreEqual(@"$/AutoCAD/M-Branches/R/components/global/src/coredll/accore.vcxproj", r);
         }
 
         [TestMethod]
         public void Get_KeyName_From_Path() {
-            ParserManager pm = new ParserManager();
-            pm.Branch = @"$/AutoCAD/M-Branches/R";
+            RunnerConfig cfg = new RunnerConfig();
+            cfg.FullFilePath = @"U:\components\global\src\coredll\accore.vcxproj";
+            cfg.Branch = @"$/AutoCAD/M-Branches/R";
 
-            String s = @"U:\components\global\src\coredll\accore.vcxproj";
-            String r = pm.KeyName(s);
-
+            String r = cfg.ProjectKey;
             Assert.AreEqual(@"AutoCAD_M-Branches_R_components_global_src_coredll_accore_vcxproj", r);
         }
 
