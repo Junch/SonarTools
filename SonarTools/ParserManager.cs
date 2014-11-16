@@ -1,11 +1,8 @@
-﻿using Microsoft.Build.Evaluation;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using Microsoft.Build.Evaluation;
+using SonarTools.Runner;
 
 namespace SonarTools {
 
@@ -21,39 +18,38 @@ namespace SonarTools {
         public String Version { get; set; }
         public String Branch { get; set; }
 
-        public RunnerConfig Parser(String projectPath) {
+        public SonarRunner Parser(String projectPath) {
             Project proj = new Project(projectPath);
-            //String cppcheckReportpath = keyName + ".xml";
-
-            RunnerConfig cfg = new RunnerConfig();
-            cfg.Branch = Branch;
-            cfg["SourceEncoding"] = "UTF-8";
-            cfg["ProjectVersion"] = Version;
 
             ProjectProperty prop = proj.GetProperty("Language");
             if (prop.EvaluatedValue == "C++") {
-                cfg.type = cppPlugType;
+
                 VcxprojParser parser = new VcxprojParser(proj);
                 IEnumerable<String> includes = parser.IncludeDirectories;
+                System.Diagnostics.Debug.Assert(includes.Count() > 0);
                 String includePaths = String.Join(";", includes);
-
+                includePaths = String.Format("\"{0}\"", includePaths);
+  
                 if (cppPlugType == PluginType.kCppCommercial) {
-                    cfg["ProjectDescription"] = "Last run by commercial version";
-                    cfg["Language"] = "cpp";
-                    cfg["cfamily.library.directories"] = includePaths;
+                    var runner = new CommercialCppRunner(projectPath, Branch);
+                    runner["SourceEncoding"] = "UTF-8";
+                    runner["ProjectVersion"] = Version;
+                    runner["cfamily.library.directories"] = includePaths;
+                    return runner;
                 } else {
-                    cfg["ProjectDescription"] = "Last run by community version";
-                    cfg["Language"] = "c++";
-                    cfg["cxx.include_directories"] = includePaths; // For V0.9.0
-                    cfg["cxx.includeDirectories"] = includePaths; // For V0.9.1
-                    //cfg["cxx.cppcheck.reportPath"] = cppcheckReportpath;
+                    var runner = new CommunityCppRunner(projectPath, Branch);
+                    runner["SourceEncoding"] = "UTF-8";
+                    runner["ProjectVersion"] = Version;
+                    runner["cxx.include_directories"] = includePaths; // For V0.9.0
+                    runner["cxx.includeDirectories"] = includePaths; // For V0.9.1
+                    return runner;
                 }
             }
 
-            return cfg;
+            return null;
         }
 
-        public void Run(RunnerConfig config){
+        public void Run(SonarRunner config){
         }
     }
 }

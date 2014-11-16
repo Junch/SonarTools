@@ -6,15 +6,17 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace SonarTools
+namespace SonarTools.Runner
 {
-    public class RunnerConfig {
+    public class SonarRunner {
         private Dictionary<String, String> properties = new Dictionary<String, String>();
-        public String FullFilePath { get; set; }
+        public readonly String FullFilePath;
+        public readonly String Branch;
 
-        public String Branch { get; set; }
-
-        public PluginType type { get; set; }
+        public SonarRunner(String fullFilePath, String branch) {
+            this.FullFilePath = fullFilePath;
+            this.Branch = branch;
+        }
 
         public String ProjectKey {
             get {
@@ -32,21 +34,9 @@ namespace SonarTools
             }
         }
 
-        public String CppCheckCmdArguments {
-            get {
-                return String.Format("-j 8 {0} --xml 2>{1}.xml", DirectoryName, this["ProjectKey"]);
-            } 
-        }
-
-        private string DirectoryName {
+        protected string DirectoryName {
             get {
                 return System.IO.Path.GetDirectoryName(FullFilePath);
-            }
-        }
-
-        public String SonarCmdArguments {
-            get {
-                return String.Join(" ", GetProperties(true));
             }
         }
 
@@ -60,8 +50,8 @@ namespace SonarTools
             }
         }
 
-        public List<String> GetProperties (bool expand) {
-             var type = typeof(RunnerConfig);
+        public List<String> GetProperties () {
+            var type = typeof(SonarRunner);
             PropertyInfo[] pi= type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
 
             List<String> setting = new List<string>();
@@ -74,12 +64,12 @@ namespace SonarTools
                 setting.Add(String.Format("-Dsonar.{0}={1}", propName, pair.Value));
             }
 
-            if (expand) {
-                setting.Add(String.Format("-Dsonar.{0}={1}", "fullFilePath", FullFilePath));
-                setting.Add(String.Format("-Dsonar.{0}={1}", "projectKey", ProjectKey));
-                setting.Add(String.Format("-Dsonar.{0}={1}", "ProjectName", DepotName));
-                setting.Add(String.Format("-Dsonar.{0}={1}", "Sources", DirectoryName));
-            }
+            
+            setting.Add(String.Format("-Dsonar.{0}={1}", "fullFilePath", FullFilePath));
+            setting.Add(String.Format("-Dsonar.{0}={1}", "projectKey", ProjectKey));
+            setting.Add(String.Format("-Dsonar.{0}={1}", "projectName", DepotName));
+            setting.Add(String.Format("-Dsonar.{0}={1}", "sources", DirectoryName));
+
 
             return setting;
         }
@@ -88,7 +78,15 @@ namespace SonarTools
             return Char.ToLower(propName[0]) + propName.Substring(1);
         }
 
-        public void Run() {
+        public String SonarCmdArguments {
+            get {
+                return String.Join(" ", GetProperties());
+            }
+        }
+
+        public void RunSonarCmd() {
+            System.Console.WriteLine("SonarCmd: {0}", SonarCmdArguments);
+
             System.Diagnostics.Process proc = new System.Diagnostics.Process();
             //proc.StartInfo.WorkingDirectory = "...";
             proc.StartInfo.FileName = "sonar-runner.bat";
@@ -97,5 +95,14 @@ namespace SonarTools
             proc.WaitForExit();
         }
 
+        protected virtual void PreRun() { }
+
+        protected virtual void PosRun() { }
+
+        public virtual void Run() {
+            PreRun();
+            RunSonarCmd();
+            PosRun();
+        }
     }
 }

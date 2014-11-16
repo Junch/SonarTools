@@ -4,35 +4,31 @@ using System.Xml.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
+using SonarTools.Runner;
 
 namespace SonarTools.Test {
     [TestClass]
     public class UnitTest1 {
         [TestMethod]
         public void Generate_Setting_From_Properties() {
-            RunnerConfig config = new RunnerConfig();
-            config["ProjectName"] = "Simple example";
-            config["SourceEncoding"] = "UTF-8";
-            config["Language"] = "c++";
-            var setting = config.GetProperties(false);
+            SonarRunner runner = new SonarRunner(@"C:\D\Test.vcxproj", @"$/ACAD/R");
+            var setting = runner.GetProperties();
             setting.Sort();
 
-            Assert.AreEqual(3, setting.Count);
-
-            Assert.AreEqual("-Dsonar.language=c++", setting[0]);
-            Assert.AreEqual("-Dsonar.projectName=Simple example", setting[1]);
-            Assert.AreEqual("-Dsonar.sourceEncoding=UTF-8", setting[2]);
+            Assert.AreEqual(4, setting.Count);
+            Assert.AreEqual("-Dsonar.fullFilePath=C:\\D\\Test.vcxproj", setting[0]);
+            Assert.AreEqual("-Dsonar.projectKey=ACAD_R_D_Test_vcxproj", setting[1]);
+            Assert.AreEqual("-Dsonar.projectName=$/ACAD/R/D/Test.vcxproj", setting[2]);
+            Assert.AreEqual("-Dsonar.sources=C:\\D", setting[3]);
         }
 
         [TestMethod]
         public void Generate_sonarcmd_From_Properties() {
-            RunnerConfig cfg = new RunnerConfig();
-            cfg.FullFilePath = @"U:\a.vcxproj";
-            cfg.Branch = @"$/A/R";
-            cfg["Language"] = "c++";
+            SonarRunner runner = new SonarRunner(@"U:\a.vcxproj", @"$/A/R");
+            runner["Language"] = "c++";
 
-            String cmd = cfg.SonarCmdArguments;
-            Assert.AreEqual(@"-Dsonar.language=c++ -Dsonar.fullFilePath=U:\a.vcxproj -Dsonar.projectKey=A_R_a_vcxproj -Dsonar.ProjectName=$/A/R/a.vcxproj -Dsonar.Sources=U:\", cmd);
+            String cmd = runner.SonarCmdArguments;
+            Assert.AreEqual(@"-Dsonar.language=c++ -Dsonar.fullFilePath=U:\a.vcxproj -Dsonar.projectKey=A_R_a_vcxproj -Dsonar.projectName=$/A/R/a.vcxproj -Dsonar.sources=U:\", cmd);
         }
 
         [TestMethod]
@@ -41,13 +37,13 @@ namespace SonarTools.Test {
             string text =
             @"<?xml version=""1.0"" encoding=""utf-8""?>
             <Project DefaultTargets=""Build"" ToolsVersion=""12.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-              <ItemDefinitionGroup Condition=""'$(Configuration)|$(Platform)'=='Debug|Win32'"">
+              <ItemDefinitionGroup Condition=""'$(runneruration)|$(Platform)'=='Debug|Win32'"">
                 <ClCompile>
                   <WarningLevel>Level3</WarningLevel>
                   <AdditionalIncludeDirectories>C:\Test\Include;$(Macro)</AdditionalIncludeDirectories>
                 </ClCompile>
               </ItemDefinitionGroup>
-              <ItemDefinitionGroup Condition=""'$(Configuration)|$(Platform)'=='Release|Win32'"">
+              <ItemDefinitionGroup Condition=""'$(runneruration)|$(Platform)'=='Release|Win32'"">
                 <ClCompile>
                   <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
                   <AdditionalIncludeDirectories>D:\Test\Include</AdditionalIncludeDirectories>
@@ -106,24 +102,41 @@ namespace SonarTools.Test {
 
         [TestMethod]
         public void Get_DepotName_From_Path() {
-            RunnerConfig cfg = new RunnerConfig();
-            cfg.FullFilePath = @"U:\components\global\src\coredll\accore.vcxproj";
-            cfg.Branch =  @"$/AutoCAD/M-Branches/R";
+            String fullFilePath = @"U:\components\global\src\coredll\accore.vcxproj";
+            String branch = @"$/AutoCAD/M-Branches/R";
+            SonarRunner runner = new SonarRunner(fullFilePath, branch);
  
-            String r = cfg.DepotName;
+            String r = runner.DepotName;
             Assert.AreEqual(@"$/AutoCAD/M-Branches/R/components/global/src/coredll/accore.vcxproj", r);
         }
 
         [TestMethod]
         public void Get_KeyName_From_Path() {
-            RunnerConfig cfg = new RunnerConfig();
-            cfg.FullFilePath = @"U:\components\global\src\coredll\accore.vcxproj";
-            cfg.Branch = @"$/AutoCAD/M-Branches/R";
+            String fullFilePath = @"U:\components\global\src\coredll\accore.vcxproj";
+            String branch = @"$/AutoCAD/M-Branches/R";
+            SonarRunner runner = new SonarRunner(fullFilePath, branch);
 
-            String r = cfg.ProjectKey;
+            String r = runner.ProjectKey;
             Assert.AreEqual(@"AutoCAD_M-Branches_R_components_global_src_coredll_accore_vcxproj", r);
         }
 
+        [TestMethod]
+        public void Create_CommunityCppRunner() {
+            String fullFilePath = @"U:\accore.vcxproj";
+            String branch = @"$/AutoCAD/R";
+            CommunityCppRunner p = new CommunityCppRunner(fullFilePath, branch);
+            var setting = p.GetProperties();
+            setting.Sort();
+
+            Assert.AreEqual(7, setting.Count);
+            Assert.AreEqual("-Dsonar.cxx.cppcheck.reportPath=AutoCAD_R_accore_vcxproj.xml", setting[0]);
+            Assert.AreEqual("-Dsonar.fullFilePath=U:\\accore.vcxproj", setting[1]);
+            Assert.AreEqual("-Dsonar.language=c++", setting[2]);
+            Assert.AreEqual("-Dsonar.projectDescription=\"Last run by community version\"", setting[3]);
+            Assert.AreEqual("-Dsonar.projectKey=AutoCAD_R_accore_vcxproj", setting[4]);
+            Assert.AreEqual("-Dsonar.projectName=$/AutoCAD/R/accore.vcxproj", setting[5]);
+            Assert.AreEqual("-Dsonar.sources=U:\\", setting[6]);
+        }
 
     }
 }
