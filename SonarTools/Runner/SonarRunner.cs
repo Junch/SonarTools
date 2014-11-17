@@ -91,6 +91,9 @@ namespace SonarTools.Runner
             //proc.StartInfo.WorkingDirectory = "...";
             proc.StartInfo.FileName = "sonar-runner.bat";
             proc.StartInfo.Arguments = SonarCmdArguments;
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.RedirectStandardOutput = true;
+
             proc.Start();
             proc.WaitForExit();
         }

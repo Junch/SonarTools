@@ -25,6 +25,9 @@ namespace SonarTools.Runner {
             //proc.StartInfo.WorkingDirectory = "...";
             proc.StartInfo.FileName = "cppcheck.exe";
             proc.StartInfo.Arguments = CppCheckCmdArguments;
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.RedirectStandardOutput = true;
+
             proc.Start();
             proc.WaitForExit();
         }
