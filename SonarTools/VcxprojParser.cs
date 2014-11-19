@@ -28,29 +28,6 @@ namespace SonarTools {
         }
 
         #region The implemenation details
-
-        private void AddIncludeDirectoriesFromEnv(IList<String> dirs) {
-            ProjectProperty includeEnv = project.GetProperty("Include");
-            if (includeEnv != null) {
-                String[] paths = includeEnv.EvaluatedValue.Split(';');
-                foreach (String path in paths)
-                    dirs.Add(path.Trim());
-            }
-        }
-
-        public void AddAdditionalIncludeDirectories(XElement xmlTree, IList<String> dirs) {
-            XNamespace ns = xmlTree.Name.Namespace;
-            var query = xmlTree.Elements(ns + "ItemDefinitionGroup").
-                    Elements(ns + "ClCompile").
-                    Elements(ns + "AdditionalIncludeDirectories");
-
-            foreach (XElement elem in query) {
-                String[] paths = elem.Value.Split(';');
-                foreach (String path in paths)
-                    dirs.Add(path.Trim());
-            }
-        }
-
         public List<String> GetAdditionalIncludeDirectories() {
             List<String> dirs = new List<string>();
             
@@ -85,12 +62,40 @@ namespace SonarTools {
                     match = match.NextMatch();
                 }
 
-                foreach (String path in xx.Split(';'))
-                    paths.Add(path.Trim());
+                foreach (String path in xx.Split(';')) { 
+                    String trimmed = path.Trim();
+                    if (trimmed != String.Empty)
+                        paths.Add(trimmed);
+                }
             }
 
             paths.Remove("%(AdditionalIncludeDirectories)");
             return paths;
+        }
+
+        private void AddIncludeDirectoriesFromEnv(IList<String> dirs) {
+            ProjectProperty includeEnv = project.GetProperty("Include");
+            if (includeEnv != null) {
+                String[] paths = includeEnv.EvaluatedValue.Split(';');
+                foreach (String path in paths) {
+                    String trimmed = path.Trim();
+                    if(trimmed != String.Empty)
+                        dirs.Add(trimmed);
+                }
+            }
+        }
+
+        public void AddAdditionalIncludeDirectories(XElement xmlTree, IList<String> dirs) {
+            XNamespace ns = xmlTree.Name.Namespace;
+            var query = xmlTree.Elements(ns + "ItemDefinitionGroup").
+                    Elements(ns + "ClCompile").
+                    Elements(ns + "AdditionalIncludeDirectories");
+
+            foreach (XElement elem in query) {
+                String[] paths = elem.Value.Split(';');
+                foreach (String path in paths)
+                    dirs.Add(path.Trim());
+            }
         }
         #endregion
     }
