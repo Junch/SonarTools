@@ -34,7 +34,7 @@ namespace SonarTools {
             if (includeEnv != null) {
                 String[] paths = includeEnv.EvaluatedValue.Split(';');
                 foreach (String path in paths)
-                    dirs.Add(path);
+                    dirs.Add(path.Trim());
             }
         }
 
@@ -47,7 +47,7 @@ namespace SonarTools {
             foreach (XElement elem in query) {
                 String[] paths = elem.Value.Split(';');
                 foreach (String path in paths)
-                    dirs.Add(path);
+                    dirs.Add(path.Trim());
             }
         }
 
@@ -86,9 +86,10 @@ namespace SonarTools {
                 }
 
                 foreach (String path in xx.Split(';'))
-                    paths.Add(path);
+                    paths.Add(path.Trim());
             }
 
+            paths.Remove("%(AdditionalIncludeDirectories)");
             return paths;
         }
         #endregion

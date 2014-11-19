@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -68,7 +70,7 @@ namespace SonarTools.Runner
             setting.Add(String.Format("-Dsonar.{0}={1}", "fullFilePath", FullFilePath));
             setting.Add(String.Format("-Dsonar.{0}={1}", "projectKey", ProjectKey));
             setting.Add(String.Format("-Dsonar.{0}={1}", "projectName", DepotName));
-            setting.Add(String.Format("-Dsonar.{0}={1}", "sources", DirectoryName));
+            setting.Add(String.Format("-Dsonar.{0}={1}", "sources", "."));
 
 
             return setting;
@@ -84,27 +86,68 @@ namespace SonarTools.Runner
             }
         }
 
-        public void RunSonarCmd() {
-            System.Console.WriteLine("SonarCmd: {0}", SonarCmdArguments);
+        public void RunSonarCmd(String runnerHome) {          
+            String arguments = String.Format("-cp \"{0}/lib/sonar-runner-dist-2.4.jar\" org.sonar.runner.Main -Drunner.home={0} ", runnerHome);
+            arguments += SonarCmdArguments;
+            System.Console.WriteLine("SonarCmdArguments: {0}", arguments);
+            
+            string installPath = GetJavaInstallationPath();
+            string filePath = System.IO.Path.Combine(installPath, "bin\\Java.exe");
+            if (!System.IO.File.Exists(filePath)) {
+                throw new FileNotFoundException(new FileNotFoundException().Message, filePath);
+            }
 
-            System.Diagnostics.Process proc = new System.Diagnostics.Process();
-            //proc.StartInfo.WorkingDirectory = "...";
-            proc.StartInfo.FileName = "sonar-runner.bat";
-            proc.StartInfo.Arguments = SonarCmdArguments;
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardOutput = true;
+            ProcessStartInfo psi = new ProcessStartInfo();
+            psi.FileName = filePath;
+            psi.Arguments = arguments;
+            psi.UseShellExecute = false;
+            psi.RedirectStandardOutput = true;
+            psi.RedirectStandardError = true;
+            psi.WindowStyle = ProcessWindowStyle.Hidden;
+            psi.CreateNoWindow = true;
+            psi.ErrorDialog = false;
+            psi.WorkingDirectory = Environment.CurrentDirectory;
 
-            proc.Start();
-            proc.WaitForExit();
+            using (Process proc = Process.Start(psi)) {
+                proc.OutputDataReceived += proc_DataReceived;
+                proc.ErrorDataReceived += proc_DataReceived;
+                proc.EnableRaisingEvents = true;
+
+                proc.Start();
+                proc.BeginErrorReadLine();
+                proc.BeginOutputReadLine();
+                proc.WaitForExit();
+            }
         }
+
+        private string GetJavaInstallationPath() {
+            string environmentPath = Environment.GetEnvironmentVariable("JAVA_HOME");
+            if (!string.IsNullOrEmpty(environmentPath)) {
+                return environmentPath;
+            }
+
+            string javaKey = "SOFTWARE\\JavaSoft\\Java Runtime Environment\\";
+            using (Microsoft.Win32.RegistryKey rk = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(javaKey)) {
+                string currentVersion = rk.GetValue("CurrentVersion").ToString();
+                using (Microsoft.Win32.RegistryKey key = rk.OpenSubKey(currentVersion)) {
+                    return key.GetValue("JavaHome").ToString();
+                }
+            }
+        }
+
+        void proc_DataReceived(object sender, DataReceivedEventArgs e) {
+            if (e.Data != null)
+                System.Console.WriteLine(e.Data);
+        }
+
 
         protected virtual void PreRun() { }
 
         protected virtual void PosRun() { }
 
-        public virtual void Run() {
+        public virtual void Run(String runnerHome) {
             PreRun();
-            RunSonarCmd();
+            RunSonarCmd(runnerHome);
             PosRun();
         }
     }
