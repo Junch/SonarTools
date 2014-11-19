@@ -13,8 +13,9 @@ namespace SonarTools.Runner {
         public CommunityCppRunner(String fullFilePath, String branch): base(fullFilePath, branch) {
             this["ProjectDescription"] = "\"Last run by community version\"";
             this["Language"] = "c++";
-            this["cxx.cppcheck.reportPath"] = ProjectKey + ".xml";
             this["ProjectBaseDir"] = DirectoryName;
+            this["cxx.cppcheck.reportPath"] = ProjectKey + ".xml";
+            this["cxx.suffixes.headers"]= ".x"; // Don't parse the header files as the commerical does
             cppcheckWriter = File.CreateText(DirectoryName + "\\" + ProjectKey + ".xml");
         }
 
