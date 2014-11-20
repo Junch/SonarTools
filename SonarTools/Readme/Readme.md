@@ -1,6 +1,10 @@
 Readme.md
 =================
 
+https://github.com/wenns/sonar-cxx/wiki
+
+http://www.sonarsource.com/products/plugins/languages/c-cpp-objectivec/installation-and-usage/
+
 To aim is to run the sonar properly for the files in the vcxproj, csproj
 
 ##Todo
@@ -11,6 +15,9 @@ To aim is to run the sonar properly for the files in the vcxproj, csproj
 - Clean the cache.
 - Limits the numbers of sonar-sunner.bat to be run simultaneously.
 - Support csharp
+- Configuration file could contain folder name. All projects in the folder need be analyzed. Use char '-' to escape.
+- Analyze the .log file to calculate how many files are analyzed, how many files are with "parser error".
+- For commerical build. set the sonar.cfamily.cppcheck.path property to the path of the Cppcheck executable.
 
 ##Implemented
 - Learn to use cppcheck to generate the .xml output.
