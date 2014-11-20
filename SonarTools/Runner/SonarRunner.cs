@@ -92,18 +92,11 @@ namespace SonarTools.Runner
         }
 
         public void RunSonarCmd(String runnerHome) {
-            String arguments = String.Format("-cp \"{0}/lib/sonar-runner-dist-2.4.jar\" org.sonar.runner.Main -Drunner.home={0} ", runnerHome);
-            arguments += SonarCmdArguments;
-            WriteLog(String.Format("Sonar-runner arguments: {0}", arguments));
-
-            string installPath = GetJavaInstallationPath();
-            string filePath = System.IO.Path.Combine(installPath, "bin\\Java.exe");
-            if (!System.IO.File.Exists(filePath)) {
-                throw new FileNotFoundException(new FileNotFoundException().Message, filePath);
-            }
+            String arguments = String.Format("/c {0}/bin/sonar-runner.bat {1}", runnerHome, SonarCmdArguments);
+            WriteLog(String.Format("Sonar-runner arguments: {0}", SonarCmdArguments));
 
             ProcessStartInfo psi = new ProcessStartInfo();
-            psi.FileName = filePath;
+            psi.FileName = "cmd.exe";
             psi.Arguments = arguments;
             psi.UseShellExecute = false;
             psi.RedirectStandardOutput = true;
@@ -122,21 +115,6 @@ namespace SonarTools.Runner
                 proc.BeginErrorReadLine();
                 proc.BeginOutputReadLine();
                 proc.WaitForExit();
-            }
-        }
-
-        private string GetJavaInstallationPath() {
-            string environmentPath = Environment.GetEnvironmentVariable("JAVA_HOME");
-            if (!string.IsNullOrEmpty(environmentPath)) {
-                return environmentPath;
-            }
-
-            string javaKey = "SOFTWARE\\JavaSoft\\Java Runtime Environment\\";
-            using (Microsoft.Win32.RegistryKey rk = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(javaKey)) {
-                string currentVersion = rk.GetValue("CurrentVersion").ToString();
-                using (Microsoft.Win32.RegistryKey key = rk.OpenSubKey(currentVersion)) {
-                    return key.GetValue("JavaHome").ToString();
-                }
             }
         }
 
