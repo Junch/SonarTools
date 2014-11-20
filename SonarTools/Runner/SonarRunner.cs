@@ -14,6 +14,7 @@ namespace SonarTools.Runner
         private Dictionary<String, String> properties = new Dictionary<String, String>();
         public readonly String FullFilePath;
         public readonly String Branch;
+        private StreamWriter logWriter;
 
         public SonarRunner(String fullFilePath, String branch) {
             this.FullFilePath = fullFilePath;
@@ -52,6 +53,12 @@ namespace SonarTools.Runner
             }
         }
 
+        public String LogFilepath {
+            get {
+                return String.Format("{0}\\{1}.log", DirectoryName, ProjectKey);
+            }
+        }
+
         public List<String> GetProperties () {
             var type = typeof(SonarRunner);
             PropertyInfo[] pi= type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
@@ -66,12 +73,10 @@ namespace SonarTools.Runner
                 setting.Add(String.Format("-Dsonar.{0}={1}", propName, pair.Value));
             }
 
-            
             setting.Add(String.Format("-Dsonar.{0}={1}", "fullFilePath", FullFilePath));
             setting.Add(String.Format("-Dsonar.{0}={1}", "projectKey", ProjectKey));
             setting.Add(String.Format("-Dsonar.{0}={1}", "projectName", DepotName));
             setting.Add(String.Format("-Dsonar.{0}={1}", "sources", "."));
-
 
             return setting;
         }
@@ -86,11 +91,11 @@ namespace SonarTools.Runner
             }
         }
 
-        public void RunSonarCmd(String runnerHome) {          
+        public void RunSonarCmd(String runnerHome) {
             String arguments = String.Format("-cp \"{0}/lib/sonar-runner-dist-2.4.jar\" org.sonar.runner.Main -Drunner.home={0} ", runnerHome);
             arguments += SonarCmdArguments;
             System.Console.WriteLine("SonarCmdArguments: {0}", arguments);
-            
+
             string installPath = GetJavaInstallationPath();
             string filePath = System.IO.Path.Combine(installPath, "bin\\Java.exe");
             if (!System.IO.File.Exists(filePath)) {
@@ -108,6 +113,7 @@ namespace SonarTools.Runner
             psi.ErrorDialog = false;
             psi.WorkingDirectory = Environment.CurrentDirectory;
 
+            using (logWriter = File.CreateText(LogFilepath)) 
             using (Process proc = Process.Start(psi)) {
                 proc.OutputDataReceived += proc_DataReceived;
                 proc.ErrorDataReceived += proc_DataReceived;
@@ -136,10 +142,9 @@ namespace SonarTools.Runner
         }
 
         void proc_DataReceived(object sender, DataReceivedEventArgs e) {
-            if (e.Data != null)
-                System.Console.WriteLine(e.Data);
+            if (e.Data != null && logWriter != null)
+                logWriter.WriteLine(e.Data);
         }
-
 
         protected virtual void PreRun() { }
 

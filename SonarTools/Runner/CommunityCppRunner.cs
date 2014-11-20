@@ -31,28 +31,27 @@ namespace SonarTools.Runner {
         }
 
         public void RunCppCheckCmd() {
-            using (cppcheckWriter = File.CreateText(CppcheckLogFilepath)) {
-                ProcessStartInfo psi = new ProcessStartInfo();
-                psi.FileName = "cppcheck.exe";
-                psi.Arguments = CppCheckCmdArguments;
-                psi.UseShellExecute = false;
-                psi.RedirectStandardOutput = true;
-                psi.RedirectStandardError = true;
-                psi.WindowStyle = ProcessWindowStyle.Hidden;
-                psi.CreateNoWindow = true;
-                psi.ErrorDialog = false;
-                psi.WorkingDirectory = DirectoryName;
+            ProcessStartInfo psi = new ProcessStartInfo();
+            psi.FileName = "cppcheck.exe";
+            psi.Arguments = CppCheckCmdArguments;
+            psi.UseShellExecute = false;
+            psi.RedirectStandardOutput = true;
+            psi.RedirectStandardError = true;
+            psi.WindowStyle = ProcessWindowStyle.Hidden;
+            psi.CreateNoWindow = true;
+            psi.ErrorDialog = false;
+            psi.WorkingDirectory = DirectoryName;
 
-                using (Process proc = Process.Start(psi)) {
-                    proc.OutputDataReceived += proc_DataReceived;
-                    proc.ErrorDataReceived += proc_ErrorDataReceived;
-                    proc.EnableRaisingEvents = true;
+            using (cppcheckWriter = File.CreateText(CppcheckLogFilepath))
+            using (Process proc = Process.Start(psi)) {
+                proc.OutputDataReceived += proc_DataReceived;
+                proc.ErrorDataReceived += proc_ErrorDataReceived;
+                proc.EnableRaisingEvents = true;
 
-                    proc.Start();
-                    proc.BeginErrorReadLine();
-                    proc.BeginOutputReadLine();
-                    proc.WaitForExit();
-                }
+                proc.Start();
+                proc.BeginErrorReadLine();
+                proc.BeginOutputReadLine();
+                proc.WaitForExit();
             }
         }
 
