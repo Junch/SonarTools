@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SonarTools;
 using System.Diagnostics;
 
@@ -13,27 +9,18 @@ namespace SonarConsole {
             pm.cppPlugType = PluginType.kCppCommunity;
             pm.Branch = "$/ACAD/R";
             pm.Version = "1.0.0.1";
-
-            String[] files = {
+            pm.SonarRunnerHome = "D:/sonar-runner-2.4";
+            pm.Filepaths = new String[] {
                 @"U:\components\global\src\AcBrowser\AcHelpWrapper\AcHelpWrapper.vcxproj",
                 @"U:\components\global\src\crxapps\rect\rectang.vcxproj",
                 //@"U:\develop\global\src\coreapps\textfind\TextFind.vcxproj",
                 //@"D:\Github\wtl\example\NetworkDrive\NetworkDrive.vcxproj",
                 //@"U:\components\global\src\objectdbx\dbxapps\AcPointCloud\AcDbPointCloudDbx\AcDbPointCloudDbx.vcxproj"
             };
-            String sonarRunnerHome = "D:/sonar-runner-2.4";
 
             Stopwatch timer = new Stopwatch();
             timer.Start();
-
-            List<Task> tasks = new List<Task>();
-            foreach(var file in files) {
-                var v = pm.Parser(file);
-                if (v != null)
-                    tasks.Add(v.Run(sonarRunnerHome));
-            }
-
-            Task.WaitAll(tasks.ToArray());
+            pm.Run();
             timer.Stop();
 
             double elapsedSeconds = (double)timer.ElapsedTicks / (double)Stopwatch.Frequency;

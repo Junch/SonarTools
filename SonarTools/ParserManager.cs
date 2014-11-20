@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using SonarTools.Runner;
+using System.Threading.Tasks;
 
 namespace SonarTools {
 
@@ -18,6 +19,7 @@ namespace SonarTools {
         public String Version { get; set; }
         public String Branch { get; set; }
         public String SonarRunnerHome { get; set; }
+        public String[] Filepaths { get; set; }
 
         public SonarRunner Parser(String projectPath) {
             try {
@@ -66,7 +68,15 @@ namespace SonarTools {
             runner["ProjectVersion"] = Version;
         }
 
-        public void Run(SonarRunner config){
+        public void Run(){
+            List<Task> tasks = new List<Task>();
+            foreach (var file in Filepaths) {
+                var v = Parser(file);
+                if (v != null)
+                    tasks.Add(v.Run(SonarRunnerHome));
+            }
+
+            Task.WaitAll(tasks.ToArray());
         }
     }
 }
