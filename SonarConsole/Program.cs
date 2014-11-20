@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SonarTools;
+using System.Diagnostics;
 
 namespace SonarConsole {
     class Program {
@@ -13,12 +14,30 @@ namespace SonarConsole {
             pm.Branch = "$/ACAD/R";
             pm.Version = "1.0.0.1";
 
-            //String file = @"D:\Github\wtl\example\NetworkDrive\NetworkDrive.vcxproj";
-            //String file = @"U:\components\global\src\objectdbx\dbxapps\AcPointCloud\AcDbPointCloudDbx\AcDbPointCloudDbx.vcxproj";
-            String file = @"U:\components\global\src\AcBrowser\AcHelpWrapper\AcHelpWrapper.vcxproj";
-            var v = pm.Parser(file);
+            String[] files = {
+                @"U:\components\global\src\AcBrowser\AcHelpWrapper\AcHelpWrapper.vcxproj",
+                @"U:\components\global\src\crxapps\rect\rectang.vcxproj",
+                //@"U:\develop\global\src\coreapps\textfind\TextFind.vcxproj",
+                //@"D:\Github\wtl\example\NetworkDrive\NetworkDrive.vcxproj",
+                //@"U:\components\global\src\objectdbx\dbxapps\AcPointCloud\AcDbPointCloudDbx\AcDbPointCloudDbx.vcxproj"
+            };
             String sonarRunnerHome = "D:/sonar-runner-2.4";
-            v.Run(sonarRunnerHome);
+
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+
+            List<Task> tasks = new List<Task>();
+            foreach(var file in files) {
+                var v = pm.Parser(file);
+                if (v != null)
+                    tasks.Add(v.Run(sonarRunnerHome));
+            }
+
+            Task.WaitAll(tasks.ToArray());
+            timer.Stop();
+
+            double elapsedSeconds = (double)timer.ElapsedTicks / (double)Stopwatch.Frequency;
+            System.Console.WriteLine("Seconds: {0:0.00}", elapsedSeconds);
         }
     }
 }
