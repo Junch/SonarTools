@@ -94,7 +94,7 @@ namespace SonarTools.Runner
         public void RunSonarCmd(String runnerHome) {
             String arguments = String.Format("-cp \"{0}/lib/sonar-runner-dist-2.4.jar\" org.sonar.runner.Main -Drunner.home={0} ", runnerHome);
             arguments += SonarCmdArguments;
-            System.Console.WriteLine("SonarCmdArguments: {0}", arguments);
+            WriteLog(String.Format("Sonar-runner arguments: {0}", arguments));
 
             string installPath = GetJavaInstallationPath();
             string filePath = System.IO.Path.Combine(installPath, "bin\\Java.exe");
@@ -113,7 +113,6 @@ namespace SonarTools.Runner
             psi.ErrorDialog = false;
             psi.WorkingDirectory = Environment.CurrentDirectory;
 
-            using (logWriter = File.CreateText(LogFilepath)) 
             using (Process proc = Process.Start(psi)) {
                 proc.OutputDataReceived += proc_DataReceived;
                 proc.ErrorDataReceived += proc_DataReceived;
@@ -142,8 +141,13 @@ namespace SonarTools.Runner
         }
 
         void proc_DataReceived(object sender, DataReceivedEventArgs e) {
-            if (e.Data != null && logWriter != null)
-                logWriter.WriteLine(e.Data);
+            if (e.Data != null)
+                WriteLog(e.Data);
+        }
+
+        protected void WriteLog(String log) {
+            if (logWriter != null)
+                logWriter.WriteLine(log);
         }
 
         protected virtual void PreRun() { }
@@ -151,9 +155,13 @@ namespace SonarTools.Runner
         protected virtual void PosRun() { }
 
         public virtual void Run(String runnerHome) {
-            PreRun();
-            RunSonarCmd(runnerHome);
-            PosRun();
+            using (logWriter = File.CreateText(LogFilepath)) {
+                System.Console.WriteLine("==> {0}", DepotName);
+                PreRun();
+                RunSonarCmd(runnerHome);
+                PosRun();
+                System.Console.WriteLine("<== {0}", DepotName);
+            }
         }
     }
 }

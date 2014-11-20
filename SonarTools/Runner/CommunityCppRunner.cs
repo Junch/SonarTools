@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SonarTools.Runner {
     public class CommunityCppRunner: SonarRunner {
-        StreamWriter cppcheckWriter;
+        StreamWriter cppcheckErrorWriter;
         
         public CommunityCppRunner(String fullFilePath, String branch): base(fullFilePath, branch) {
             this["ProjectDescription"] = "\"Last run by community version\"";
@@ -18,7 +18,7 @@ namespace SonarTools.Runner {
             this["cxx.suffixes.headers"]= ".x"; // Don't parse the header files as the commerical does
         }
 
-        public String CppcheckLogFilepath {
+        public String CppcheckErrorLogFile {
             get {
                 return String.Format("{0}\\{1}.xml", DirectoryName, ProjectKey);
             }
@@ -42,27 +42,29 @@ namespace SonarTools.Runner {
             psi.ErrorDialog = false;
             psi.WorkingDirectory = DirectoryName;
 
-            using (cppcheckWriter = File.CreateText(CppcheckLogFilepath))
+            using (cppcheckErrorWriter = File.CreateText(CppcheckErrorLogFile))
             using (Process proc = Process.Start(psi)) {
                 proc.OutputDataReceived += proc_DataReceived;
                 proc.ErrorDataReceived += proc_ErrorDataReceived;
                 proc.EnableRaisingEvents = true;
 
+                WriteLog("############################### Cppcheck begin ###############################");
                 proc.Start();
                 proc.BeginErrorReadLine();
                 proc.BeginOutputReadLine();
                 proc.WaitForExit();
+                WriteLog("################################ Cppcheck end ################################\n");
             }
         }
 
         void proc_DataReceived(object sender, DataReceivedEventArgs e) {
             if (e.Data != null)
-                System.Console.WriteLine(e.Data);
+                WriteLog(e.Data);
         }
 
         void proc_ErrorDataReceived(object sender, DataReceivedEventArgs e) {
-            if (e.Data != null && cppcheckWriter != null)
-                cppcheckWriter.WriteLine(e.Data);
+            if (e.Data != null && cppcheckErrorWriter != null)
+                cppcheckErrorWriter.WriteLine(e.Data);
         }
 
         protected override void PreRun() {
