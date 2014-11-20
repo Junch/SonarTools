@@ -41,13 +41,7 @@ namespace SonarTools {
             String projectPath = proj.FullPath;
 
             VcxprojParser parser = new VcxprojParser(proj);
-            IEnumerable<String> includes = parser.IncludeDirectories;
-            if (includes.Count() == 0) {
-                throw new InvalidOperationException(String.Format("Failed to get the include directories from {0}", projectPath));
-            }
-            
-            var includesWithQuates = from x in includes select String.Format("\"{0}\"", x);
-            String includePaths = String.Join(",", includesWithQuates);
+            String includePaths = parser.IncludeDirectoriesJoined;
 
             SonarRunner runner;
             if (cppPlugType == PluginType.kCppCommercial) {

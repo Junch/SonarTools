@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using SonarTools.Runner;
+using Moq;
 
 namespace SonarTools.Test {
     [TestClass]
@@ -155,6 +156,18 @@ namespace SonarTools.Test {
             Assert.AreEqual("-Dsonar.projectKey=AutoCAD_R_accore_vcxproj", setting[6]);
             Assert.AreEqual("-Dsonar.projectName=$/AutoCAD/R/accore.vcxproj", setting[7]);
             Assert.AreEqual("-Dsonar.sources=.", setting[8]);
+        }
+
+        [TestMethod]
+        public void Include_Directories_Joined() {
+            Mock<VcxprojParser> parser = new Mock<VcxprojParser>();
+            IEnumerable<String> includes = new String[]{
+                @"C:\dir\include",
+                @"..\include"
+            };
+
+            parser.Setup(m => m.IncludeDirectories).Returns(includes);
+            Assert.AreEqual("\"C:\\dir\\include\",\"..\\include\"", parser.Object.IncludeDirectoriesJoined);
         }
     }
 }

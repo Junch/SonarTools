@@ -17,13 +17,25 @@ namespace SonarTools {
             this.project = project;
         }
 
-        public IEnumerable<string> IncludeDirectories {
+        public virtual IEnumerable<string> IncludeDirectories {
             get {
                 List<String> unevaluatedPaths = GetAdditionalIncludeDirectories();
                 var evaluatedPaths = EvaluateDirectories(unevaluatedPaths);
 
                 AddIncludeDirectoriesFromEnv(evaluatedPaths);
                 return evaluatedPaths.Distinct();
+            }
+        }
+
+        public String IncludeDirectoriesJoined {
+            get {
+                IEnumerable<String> includes = IncludeDirectories;
+                if (includes.Count() == 0) {
+                    throw new InvalidOperationException(String.Format("Failed to get the include directories from {0}", project.FullPath));
+                }
+
+                var includesWithQuates = from x in includes select String.Format("\"{0}\"", x);
+                return String.Join(",", includesWithQuates);
             }
         }
 
