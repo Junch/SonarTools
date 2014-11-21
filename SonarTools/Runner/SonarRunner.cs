@@ -132,16 +132,14 @@ namespace SonarTools.Runner
 
         protected virtual void PosRun() { }
 
-        public virtual async Task Run(String runnerHome) {
-            await Task.Run(() => {
-                using (logWriter = File.CreateText(LogFilepath)) {
-                    System.Console.WriteLine("==> {0}", DepotName);
-                    PreRun();
-                    RunSonarCmd(runnerHome);
-                    PosRun();
-                    System.Console.WriteLine("<== {0}", DepotName);
-                }
-            });
+        public virtual void Run(String runnerHome) {
+            using (logWriter = File.CreateText(LogFilepath)) {
+                System.Console.WriteLine("==> {0}", DepotName);
+                PreRun();
+                RunSonarCmd(runnerHome);
+                PosRun();
+                System.Console.WriteLine("<== {0}", DepotName);
+            }
         }
     }
 }

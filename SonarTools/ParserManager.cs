@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.Build.Evaluation;
 using SonarTools.Runner;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace SonarTools {
 
@@ -63,14 +64,31 @@ namespace SonarTools {
         }
 
         public void Run(){
-            List<Task> tasks = new List<Task>();
-            foreach (var file in Filepaths) {
-                var v = Parser(file);
-                if (v != null)
-                    tasks.Add(v.Run(SonarRunnerHome));
-            }
+            var results = new BlockingCollection<SonarRunner>();
 
-            Task.WaitAll(tasks.ToArray());
+            var taskAdd = Task.Factory.StartNew(() => {
+                foreach (var file in Filepaths) {
+                    var v = Parser(file);
+                    if (v != null)
+                        results.Add(v);
+                }
+
+                results.CompleteAdding();
+            });
+
+            var task1 = Task.Factory.StartNew(() => {
+                foreach(SonarRunner runner in results.GetConsumingEnumerable()) {
+                    runner.Run(SonarRunnerHome);
+                }
+            });
+
+            var task2 = Task.Factory.StartNew(() => {
+                foreach (SonarRunner runner in results.GetConsumingEnumerable()) {
+                    runner.Run(SonarRunnerHome);
+                }
+            });
+
+            Task.WaitAll(taskAdd, task1, task2);
         }
     }
 }
