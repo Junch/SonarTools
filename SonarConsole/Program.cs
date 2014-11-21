@@ -10,6 +10,7 @@ namespace SonarConsole {
             pm.Branch = "$/ACAD/R";
             pm.Version = "1.0.0.1";
             pm.SonarRunnerHome = "D:/sonar-runner-2.4";
+            pm.ThreadNumber = 4;
             pm.Filepaths = new String[] {
                 @"U:\components\global\src\AcBrowser\AcHelpWrapper\AcHelpWrapper.vcxproj",
                 @"U:\components\global\src\crxapps\rect\rectang.vcxproj",

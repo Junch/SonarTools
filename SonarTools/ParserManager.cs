@@ -21,6 +21,11 @@ namespace SonarTools {
         public String Branch { get; set; }
         public String SonarRunnerHome { get; set; }
         public String[] Filepaths { get; set; }
+        public int ThreadNumber { get; set; }
+
+        public ParserManager() {
+            ThreadNumber = 1;
+        }
 
         public SonarRunner Parser(String projectPath) {
             try {
@@ -64,31 +69,31 @@ namespace SonarTools {
         }
 
         public void Run(){
-            var results = new BlockingCollection<SonarRunner>();
+            List<Task> tasks = new List<Task>();
+            var coll = new BlockingCollection<SonarRunner>();
 
             var taskAdd = Task.Factory.StartNew(() => {
                 foreach (var file in Filepaths) {
                     var v = Parser(file);
                     if (v != null)
-                        results.Add(v);
+                        coll.Add(v);
                 }
 
-                results.CompleteAdding();
+                coll.CompleteAdding();
             });
+            tasks.Add(taskAdd);
+            
+            for (int i = 0; i < ThreadNumber; ++i) {
+                var task = Task.Factory.StartNew(() => {
+                    foreach (SonarRunner runner in coll.GetConsumingEnumerable()) {
+                        runner.Run(SonarRunnerHome);
+                    }
+                });
 
-            var task1 = Task.Factory.StartNew(() => {
-                foreach(SonarRunner runner in results.GetConsumingEnumerable()) {
-                    runner.Run(SonarRunnerHome);
-                }
-            });
+                tasks.Add(task);
+            }
 
-            var task2 = Task.Factory.StartNew(() => {
-                foreach (SonarRunner runner in results.GetConsumingEnumerable()) {
-                    runner.Run(SonarRunnerHome);
-                }
-            });
-
-            Task.WaitAll(taskAdd, task1, task2);
+            Task.WaitAll(tasks.ToArray());
         }
     }
 }
