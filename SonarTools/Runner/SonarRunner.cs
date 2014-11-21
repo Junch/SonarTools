@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -56,6 +57,12 @@ namespace SonarTools.Runner
         public String LogFilepath {
             get {
                 return String.Format("{0}\\{1}.log", DirectoryName, ProjectKey);
+            }
+        }
+
+        public String SymbolLinkLogFolder {
+            get {
+                return "log";
             }
         }
 
@@ -134,12 +141,31 @@ namespace SonarTools.Runner
 
         public virtual void Run(String runnerHome) {
             using (logWriter = File.CreateText(LogFilepath)) {
+                AddSymbolLink(LogFilepath);
+
                 System.Console.WriteLine("==> {0}", DepotName);
                 PreRun();
                 RunSonarCmd(runnerHome);
                 PosRun();
                 System.Console.WriteLine("<== {0}", DepotName);
             }
+        }
+        
+        [DllImport("kernel32.dll")]
+        static extern bool CreateSymbolicLink(string lpSymlinkFileName, string lpTargetFileName, SymbolicLink dwFlags);
+        enum SymbolicLink {
+            File = 0,
+            Directory = 1
+        }
+
+        protected void AddSymbolLink(String fullfilePath) {
+            if (!Directory.Exists(SymbolLinkLogFolder))
+                Directory.CreateDirectory(SymbolLinkLogFolder);
+
+            var filename = Path.GetFileName(fullfilePath);
+
+            var logLink = String.Format("{0}/{1}", SymbolLinkLogFolder, filename);
+            CreateSymbolicLink(logLink, fullfilePath, SymbolicLink.File);
         }
     }
 }

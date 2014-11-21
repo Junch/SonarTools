@@ -44,6 +44,8 @@ namespace SonarTools.Runner {
 
             using (cppcheckErrorWriter = File.CreateText(CppcheckErrorLogFile))
             using (Process proc = Process.Start(psi)) {
+                AddSymbolLink(CppcheckErrorLogFile);
+
                 proc.OutputDataReceived += proc_DataReceived;
                 proc.ErrorDataReceived += proc_ErrorDataReceived;
                 proc.EnableRaisingEvents = true;
