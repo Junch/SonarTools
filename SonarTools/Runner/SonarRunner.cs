@@ -98,7 +98,7 @@ namespace SonarTools.Runner
             }
         }
 
-        public void RunSonarCmd(String runnerHome) {
+        public bool RunSonarCmd(String runnerHome) {
             String arguments = String.Format("/c {0}/bin/sonar-runner.bat {1}", runnerHome, SonarCmdArguments);
             WriteLog(String.Format("Sonar-runner arguments: {0}", SonarCmdArguments));
 
@@ -113,6 +113,8 @@ namespace SonarTools.Runner
             psi.ErrorDialog = false;
             psi.WorkingDirectory = Environment.CurrentDirectory;
 
+            bool bSuccess = true;
+
             using (Process proc = Process.Start(psi)) {
                 proc.OutputDataReceived += proc_DataReceived;
                 proc.ErrorDataReceived += proc_DataReceived;
@@ -122,7 +124,13 @@ namespace SonarTools.Runner
                 proc.BeginErrorReadLine();
                 proc.BeginOutputReadLine();
                 proc.WaitForExit();
+
+                if (proc.ExitCode != 0) {
+                    bSuccess = false;
+                }
             }
+
+            return bSuccess;
         }
 
         void proc_DataReceived(object sender, DataReceivedEventArgs e) {
@@ -145,9 +153,15 @@ namespace SonarTools.Runner
 
                 System.Console.WriteLine("==> {0}", DepotName);
                 PreRun();
-                RunSonarCmd(runnerHome);
+                bool bSuccess = RunSonarCmd(runnerHome);
                 PosRun();
-                System.Console.WriteLine("<== {0}", DepotName);
+                if (bSuccess) { 
+                    System.Console.WriteLine("<== {0}", DepotName);
+                } else {
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    System.Console.WriteLine("x== {0}", DepotName);
+                    Console.ResetColor();
+                }
             }
         }
         
@@ -158,14 +172,14 @@ namespace SonarTools.Runner
             Directory = 1
         }
 
-        protected void AddSymbolLink(String fullfilePath) {
+        protected bool AddSymbolLink(String fullfilePath) {
             if (!Directory.Exists(SymbolLinkLogFolder))
                 Directory.CreateDirectory(SymbolLinkLogFolder);
 
             var filename = Path.GetFileName(fullfilePath);
 
             var logLink = String.Format("{0}/{1}", SymbolLinkLogFolder, filename);
-            CreateSymbolicLink(logLink, fullfilePath, SymbolicLink.File);
+            return CreateSymbolicLink(logLink, fullfilePath, SymbolicLink.File);
         }
     }
 }
