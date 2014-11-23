@@ -10,7 +10,7 @@ namespace SonarTools.Parser {
             this.setting = setting;
         }
 
-        public SonarRunner Parse(String projectPath) {
+        public virtual SonarRunner Parse(String projectPath) {
             try {
                 Project proj = new Project(projectPath);
 

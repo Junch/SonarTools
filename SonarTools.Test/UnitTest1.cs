@@ -170,5 +170,29 @@ namespace SonarTools.Test {
             parser.Setup(m => m.IncludeDirectories).Returns(includes);
             Assert.AreEqual("\"C:\\dir\\include\",\"..\\include\"", parser.Object.IncludeDirectoriesJoined);
         }
+
+        [TestMethod]
+        public void RunnerManager_With_4_Threads() {
+            RunnerSetting setting = new RunnerSetting{
+                RunnerHome = "home",
+                ThreadNumber = 4,
+                Filepaths = new String[]{
+                    "file1.vcxproj", "file2.vcxproj"
+                }
+            };
+
+            Mock<SonarRunner> runner = new Mock<SonarRunner>("temp.vcxproj", "");
+            Mock<ProjectParser> parser = new Mock<ProjectParser>(setting);
+            parser.Setup(m => m.Parse(It.IsAny<String>())).Returns(runner.Object);
+
+            SonarRunnerManager manager = new SonarRunnerManager(setting, parser.Object);
+            manager.Run();
+
+            runner.Verify(m => m.Run(It.Is<String>(arg => arg == "home")), Times.Exactly(2));
+
+            parser.Verify(m => m.Parse(It.IsAny<String>()), Times.Exactly(2));
+            parser.Verify(m => m.Parse(It.Is<String>(arg => arg == "file1.vcxproj")), Times.Once);
+            parser.Verify(m => m.Parse(It.Is<String>(arg => arg == "file2.vcxproj")), Times.Once);
+        }
     }
 }
