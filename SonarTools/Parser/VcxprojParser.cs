@@ -5,7 +5,7 @@ using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Evaluation;
 
-namespace SonarTools {
+namespace SonarTools.Parser {
     public class VcxprojParser {
 
         public Project project { get; set; }

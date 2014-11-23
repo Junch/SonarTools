@@ -5,13 +5,13 @@ using System.Diagnostics;
 namespace SonarConsole {
     class Program {
         static void Main(string[] args) {
-            SonarRunnerManager pm = new SonarRunnerManager();
-            pm.cppPlugType = PluginType.kCppCommunity;
-            pm.Branch = "$/ACAD/R";
-            pm.Version = "1.0.0.1";
-            pm.SonarRunnerHome = "D:/sonar-runner-2.4";
-            pm.ThreadNumber = 4;
-            pm.Filepaths = new String[] {
+            RunnerSetting setting = new RunnerSetting{
+                Branch = "$/ACAD/R",
+                RunnerHome = "D:/sonar-runner-2.4",
+                ThreadNumber = 4,
+            };
+
+            setting.Filepaths = new String[] {
                 @"U:\components\global\src\AcBrowser\AcHelpWrapper\AcHelpWrapper.vcxproj",
                 @"U:\components\global\src\crxapps\rect\rectang.vcxproj",
                 //@"D:\Github\Cplusplus\c11test\c11test.vcxproj",
@@ -20,6 +20,7 @@ namespace SonarConsole {
                 //@"U:\components\global\src\objectdbx\dbxapps\AcPointCloud\AcDbPointCloudDbx\AcDbPointCloudDbx.vcxproj"
             };
 
+            SonarRunnerManager pm = new SonarRunnerManager(setting);
             Stopwatch timer = new Stopwatch();
             timer.Start();
             pm.Run();

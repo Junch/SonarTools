@@ -40,10 +40,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Parser\ProjectParser.cs" />
     <Compile Include="Runner\CommunityCppRunner.cs" />
     <Compile Include="Runner\CommercialCppRunner.cs" />
     <Compile Include="SonarRunnerManager.cs" />
-    <Compile Include="VcxprojParser.cs" />
+    <Compile Include="Parser\VcxprojParser.cs" />
     <Compile Include="Runner\SonarRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

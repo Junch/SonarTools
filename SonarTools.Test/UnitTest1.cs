@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using SonarTools.Runner;
+using SonarTools.Parser;
 using Moq;
 
 namespace SonarTools.Test {
