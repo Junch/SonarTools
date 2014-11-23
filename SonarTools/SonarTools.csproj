@@ -42,7 +42,7 @@
   <ItemGroup>
     <Compile Include="Runner\CommunityCppRunner.cs" />
     <Compile Include="Runner\CommercialCppRunner.cs" />
-    <Compile Include="ParserManager.cs" />
+    <Compile Include="SonarRunnerManager.cs" />
     <Compile Include="VcxprojParser.cs" />
     <Compile Include="Runner\SonarRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

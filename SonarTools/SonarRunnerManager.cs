@@ -15,7 +15,7 @@ namespace SonarTools {
         kJava
     };
  
-    public class ParserManager {
+    public class SonarRunnerManager {
         public PluginType cppPlugType { get; set; }
         public String Version { get; set; }
         public String Branch { get; set; }
@@ -23,7 +23,7 @@ namespace SonarTools {
         public String[] Filepaths { get; set; }
         public int ThreadNumber { get; set; }
 
-        public ParserManager() {
+        public SonarRunnerManager() {
             ThreadNumber = 1;
         }
 

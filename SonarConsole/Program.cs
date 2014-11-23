@@ -5,7 +5,7 @@ using System.Diagnostics;
 namespace SonarConsole {
     class Program {
         static void Main(string[] args) {
-            ParserManager pm = new ParserManager();
+            SonarRunnerManager pm = new SonarRunnerManager();
             pm.cppPlugType = PluginType.kCppCommunity;
             pm.Branch = "$/ACAD/R";
             pm.Version = "1.0.0.1";
@@ -14,6 +14,7 @@ namespace SonarConsole {
             pm.Filepaths = new String[] {
                 @"U:\components\global\src\AcBrowser\AcHelpWrapper\AcHelpWrapper.vcxproj",
                 @"U:\components\global\src\crxapps\rect\rectang.vcxproj",
+                //@"D:\Github\Cplusplus\c11test\c11test.vcxproj",
                 //@"U:\develop\global\src\coreapps\textfind\TextFind.vcxproj",
                 //@"D:\Github\wtl\example\NetworkDrive\NetworkDrive.vcxproj",
                 //@"U:\components\global\src\objectdbx\dbxapps\AcPointCloud\AcDbPointCloudDbx\AcDbPointCloudDbx.vcxproj"
