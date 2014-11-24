@@ -22,8 +22,8 @@ namespace SonarTools {
     }
 
     public class SonarRunnerManager {
-        private RunnerSetting setting;
-        private ProjectParser parser; 
+        private readonly RunnerSetting setting;
+        private readonly ProjectParser parser; 
 
         public SonarRunnerManager(RunnerSetting setting, ProjectParser parser = null) {
             this.setting = setting;
@@ -31,6 +31,8 @@ namespace SonarTools {
         }
 
         public void Run(){
+            IncreaseHeapsize();
+
             List<Task> tasks = new List<Task>();
             var coll = new BlockingCollection<SonarRunner>();
 
@@ -56,6 +58,14 @@ namespace SonarTools {
             }
 
             Task.WaitAll(tasks.ToArray());
+        }
+
+        private static void IncreaseHeapsize() {
+            String envName = "SONAR_RUNNER_OPTS";
+            String envValue = "-Xmx512m -XX:MaxPermSize=128m";
+
+            if (Environment.GetEnvironmentVariable(envName) == null)
+                Environment.SetEnvironmentVariable(envName, envValue);
         }
     }
 }
