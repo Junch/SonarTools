@@ -80,7 +80,6 @@ namespace SonarTools.Runner
                 setting.Add(String.Format("-Dsonar.{0}={1}", propName, pair.Value));
             }
 
-            setting.Add(String.Format("-Dsonar.{0}={1}", "fullFilePath", FullFilePath));
             setting.Add(String.Format("-Dsonar.{0}={1}", "projectKey", ProjectKey));
             setting.Add(String.Format("-Dsonar.{0}={1}", "projectName", DepotName));
             setting.Add(String.Format("-Dsonar.{0}={1}", "sources", "."));

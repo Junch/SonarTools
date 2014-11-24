@@ -30,6 +30,7 @@ namespace SonarTools.Parser {
 
             VcxprojParser parser = new VcxprojParser(proj);
             String includePaths = parser.IncludeDirectoriesJoined;
+            includePaths = includePaths.Replace('\\', '/');
 
             SonarRunner runner;
             if (setting.CppType == CppPluginType.kCppCommercial) {

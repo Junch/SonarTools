@@ -17,12 +17,10 @@ namespace SonarTools.Test {
             var setting = runner.GetProperties();
             setting.Sort();
 
-            Assert.AreEqual(4, setting.Count);
-            Assert.AreEqual("-Dsonar.fullFilePath=C:\\D\\Test.vcxproj", setting[0]);
-            Assert.AreEqual("-Dsonar.projectKey=ACAD_R_D_Test_vcxproj", setting[1]);
-            Assert.AreEqual("-Dsonar.projectName=$/ACAD/R/D/Test.vcxproj", setting[2]);
-            //Assert.AreEqual("-Dsonar.sources=C:\\D", setting[3]); for 0.9
-            Assert.AreEqual("-Dsonar.sources=.", setting[3]);
+            Assert.AreEqual(3, setting.Count);
+            Assert.AreEqual("-Dsonar.projectKey=ACAD_R_D_Test_vcxproj", setting[0]);
+            Assert.AreEqual("-Dsonar.projectName=$/ACAD/R/D/Test.vcxproj", setting[1]);
+            Assert.AreEqual("-Dsonar.sources=.", setting[2]);
         }
 
         [TestMethod]
@@ -32,7 +30,7 @@ namespace SonarTools.Test {
 
             String cmd = runner.SonarCmdArguments;
             //Assert.AreEqual(@"-Dsonar.language=c++ -Dsonar.fullFilePath=U:\a.vcxproj -Dsonar.projectKey=A_R_a_vcxproj -Dsonar.projectName=$/A/R/a.vcxproj -Dsonar.sources=U:\", cmd);
-            Assert.AreEqual(@"-Dsonar.language=c++ -Dsonar.fullFilePath=U:\a.vcxproj -Dsonar.projectKey=A_R_a_vcxproj -Dsonar.projectName=$/A/R/a.vcxproj -Dsonar.sources=.", cmd);
+            Assert.AreEqual(@"-Dsonar.language=c++ -Dsonar.projectKey=A_R_a_vcxproj -Dsonar.projectName=$/A/R/a.vcxproj -Dsonar.sources=.", cmd);
         }
 
         [TestMethod]
@@ -147,16 +145,15 @@ namespace SonarTools.Test {
             var setting = p.GetProperties();
             setting.Sort();
 
-            Assert.AreEqual(9, setting.Count);
+            Assert.AreEqual(8, setting.Count);
             Assert.AreEqual("-Dsonar.cxx.cppcheck.reportPath=AutoCAD_R_accore_vcxproj.xml", setting[0]);
             Assert.AreEqual("-Dsonar.cxx.suffixes.headers=.x", setting[1]);
-            Assert.AreEqual("-Dsonar.fullFilePath=U:\\accore.vcxproj", setting[2]);
-            Assert.AreEqual("-Dsonar.language=c++", setting[3]);
-            Assert.AreEqual("-Dsonar.projectBaseDir=U:\\", setting[4]);
-            Assert.AreEqual("-Dsonar.projectDescription=\"Last run by community version\"", setting[5]);
-            Assert.AreEqual("-Dsonar.projectKey=AutoCAD_R_accore_vcxproj", setting[6]);
-            Assert.AreEqual("-Dsonar.projectName=$/AutoCAD/R/accore.vcxproj", setting[7]);
-            Assert.AreEqual("-Dsonar.sources=.", setting[8]);
+            Assert.AreEqual("-Dsonar.language=c++", setting[2]);
+            Assert.AreEqual("-Dsonar.projectBaseDir=U:\\", setting[3]);
+            Assert.AreEqual("-Dsonar.projectDescription=\"Last run by community version\"", setting[4]);
+            Assert.AreEqual("-Dsonar.projectKey=AutoCAD_R_accore_vcxproj", setting[5]);
+            Assert.AreEqual("-Dsonar.projectName=$/AutoCAD/R/accore.vcxproj", setting[6]);
+            Assert.AreEqual("-Dsonar.sources=.", setting[7]);
         }
 
         [TestMethod]
