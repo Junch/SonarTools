@@ -119,7 +119,6 @@ namespace SonarTools.Runner
                 proc.ErrorDataReceived += proc_DataReceived;
                 proc.EnableRaisingEvents = true;
 
-                proc.Start();
                 proc.BeginErrorReadLine();
                 proc.BeginOutputReadLine();
                 proc.WaitForExit();
