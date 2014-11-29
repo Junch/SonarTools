@@ -43,6 +43,7 @@
     <Compile Include="Parser\ProjectParser.cs" />
     <Compile Include="Runner\CommunityCppRunner.cs" />
     <Compile Include="Runner\CommercialCppRunner.cs" />
+    <Compile Include="Runner\CSharpRunner.cs" />
     <Compile Include="SonarRunnerManager.cs" />
     <Compile Include="Parser\VcxprojParser.cs" />
     <Compile Include="Runner\SonarRunner.cs" />

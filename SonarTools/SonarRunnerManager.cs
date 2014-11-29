@@ -40,8 +40,9 @@ namespace SonarTools {
             var taskAdd = Task.Factory.StartNew(() => {
                 foreach (var file in setting.Filepaths) {
                     var v = parser.Parse(file);
-                    if (v != null)
+                    if (v != null) { 
                         coll.Add(v);
+                    }
                 }
 
                 coll.CompleteAdding();
@@ -65,8 +66,9 @@ namespace SonarTools {
             String envName = "SONAR_RUNNER_OPTS";
             String envValue = "-Xmx512m -XX:MaxPermSize=128m";
 
-            if (Environment.GetEnvironmentVariable(envName) == null)
+            if (Environment.GetEnvironmentVariable(envName) == null) { 
                 Environment.SetEnvironmentVariable(envName, envValue);
+            }
         }
     }
 }

@@ -46,8 +46,8 @@ namespace SonarTools.Runner {
             using (Process proc = Process.Start(psi)) {
                 AddSymbolLink(CppcheckErrorLogFile);
 
-                proc.OutputDataReceived += proc_DataReceived;
-                proc.ErrorDataReceived += proc_ErrorDataReceived;
+                proc.OutputDataReceived += ProcDataReceived;
+                proc.ErrorDataReceived += ProcErrorDataReceived;
                 proc.EnableRaisingEvents = true;
 
                 WriteLog("############################### Cppcheck begin ###############################");
@@ -59,14 +59,16 @@ namespace SonarTools.Runner {
             }
         }
 
-        void proc_DataReceived(object sender, DataReceivedEventArgs e) {
-            if (e.Data != null)
+        void ProcDataReceived(object sender, DataReceivedEventArgs e) {
+            if (e.Data != null) { 
                 WriteLog(e.Data);
+            }
         }
 
-        void proc_ErrorDataReceived(object sender, DataReceivedEventArgs e) {
-            if (e.Data != null && cppcheckErrorWriter != null)
+        void ProcErrorDataReceived(object sender, DataReceivedEventArgs e) {
+            if (e.Data != null && cppcheckErrorWriter != null) { 
                 cppcheckErrorWriter.WriteLine(e.Data);
+            }
         }
 
         protected override void PreRun() {

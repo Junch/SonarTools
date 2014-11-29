@@ -76,8 +76,9 @@ namespace SonarTools.Parser {
 
                 foreach (String path in xx.Split(';')) { 
                     String trimmed = path.Trim();
-                    if (trimmed != String.Empty)
+                    if (trimmed != String.Empty) {
                         paths.Add(trimmed);
+                    }
                 }
             }
 
@@ -91,8 +92,9 @@ namespace SonarTools.Parser {
                 String[] paths = includeEnv.EvaluatedValue.Split(';');
                 foreach (String path in paths) {
                     String trimmed = path.Trim();
-                    if(trimmed != String.Empty)
+                    if (trimmed != String.Empty) { 
                         dirs.Add(trimmed);
+                    }
                 }
             }
         }
@@ -105,8 +107,9 @@ namespace SonarTools.Parser {
 
             foreach (XElement elem in query) {
                 String[] paths = elem.Value.Split(';');
-                foreach (String path in paths)
+                foreach (String path in paths) {
                     dirs.Add(path.Trim());
+                }
             }
         }
         #endregion

@@ -11,18 +11,26 @@ namespace SonarTools.Parser {
         }
 
         public virtual SonarRunner Parse(String projectPath) {
+            SonarRunner runner = null ;
+
             try {
                 Project proj = new Project(projectPath);
 
                 ProjectProperty prop = proj.GetProperty("Language");
                 if (prop.EvaluatedValue == "C++") {
-                    return ParseCpp(proj);
+                    runner = ParseCpp(proj);
+                } else if(prop.EvaluatedValue == "C#"){
+                    runner = new CSharpRunner(projectPath, setting.Branch);
                 }
             } catch (Exception e) {
                 Console.WriteLine("Exception Catch: {0}\n", e.Message);
             }
 
-            return null;
+            if (runner != null) {
+                AddGeneralSetting(runner);
+            }
+
+            return runner;
         }
 
         private SonarRunner ParseCpp(Project proj) {
@@ -42,7 +50,6 @@ namespace SonarTools.Parser {
                 runner["cxx.includeDirectories"] = GetIncludeDirectories(proj); // For V0.9.1
             }
 
-            AddGeneralSetting(runner);
             return runner;
         }
 

@@ -67,14 +67,12 @@ namespace SonarTools.Runner
         }
 
         public List<String> GetProperties () {
-            var type = typeof(SonarRunner);
-            PropertyInfo[] pi= type.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
-
             List<String> setting = new List<string>();
 
             foreach (var pair in properties) {
-                if (String.IsNullOrEmpty(pair.Value))
+                if (String.IsNullOrEmpty(pair.Value)) { 
                     continue;
+                }
 
                 String propName = FirstLetterLowercase(pair.Key);
                 setting.Add(String.Format("-Dsonar.{0}={1}", propName, pair.Value));
@@ -115,8 +113,8 @@ namespace SonarTools.Runner
             bool bSuccess = true;
 
             using (Process proc = Process.Start(psi)) {
-                proc.OutputDataReceived += proc_DataReceived;
-                proc.ErrorDataReceived += proc_DataReceived;
+                proc.OutputDataReceived += ProcDataReceived;
+                proc.ErrorDataReceived += ProcDataReceived;
                 proc.EnableRaisingEvents = true;
 
                 proc.BeginErrorReadLine();
@@ -131,19 +129,25 @@ namespace SonarTools.Runner
             return bSuccess;
         }
 
-        void proc_DataReceived(object sender, DataReceivedEventArgs e) {
-            if (e.Data != null)
+        void ProcDataReceived(object sender, DataReceivedEventArgs e) {
+            if (e.Data != null) { 
                 WriteLog(e.Data);
+            }
         }
 
         protected void WriteLog(String log) {
-            if (logWriter != null)
+            if (logWriter != null) { 
                 logWriter.WriteLine(log);
+            }
         }
 
-        protected virtual void PreRun() { }
+        protected virtual void PreRun() {
+            // To be overridden by Subclass
+        }
 
-        protected virtual void PosRun() { }
+        protected virtual void PosRun() {
+            // To be overridden by Subclass
+        }
 
         public virtual void Run(String runnerHome) {
             using (logWriter = File.CreateText(LogFilepath)) {
@@ -171,8 +175,9 @@ namespace SonarTools.Runner
         }
 
         protected bool AddSymbolLink(String fullfilePath) {
-            if (!Directory.Exists(SymbolLinkLogFolder))
+            if (!Directory.Exists(SymbolLinkLogFolder)) { 
                 Directory.CreateDirectory(SymbolLinkLogFolder);
+            }
 
             var filename = Path.GetFileName(fullfilePath);
 
