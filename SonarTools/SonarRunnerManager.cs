@@ -14,6 +14,7 @@ namespace SonarTools {
 
     public class RunnerSetting {
         public CppPluginType CppType = CppPluginType.kCppCommunity;
+        public bool UseBuildWrapper = false;
         public String Version = "1.0.0.0";
         public int ThreadNumber = 1;
         public String Branch;

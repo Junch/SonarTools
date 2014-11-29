@@ -28,22 +28,29 @@ namespace SonarTools.Parser {
         private SonarRunner ParseCpp(Project proj) {
             String projectPath = proj.FullPath;
 
-            VcxprojParser parser = new VcxprojParser(proj);
-            String includePaths = parser.IncludeDirectoriesJoined;
-            includePaths = includePaths.Replace('\\', '/');
-
             SonarRunner runner;
             if (setting.CppType == CppPluginType.kCppCommercial) {
                 runner = new CommercialCppRunner(projectPath, setting.Branch);
-                runner["cfamily.library.directories"] = includePaths;
+                if (setting.UseBuildWrapper) {
+                    runner["cfamily.build-wrapper-output"] = "sonarbuild";
+                } else {
+                    runner["cfamily.library.directories"] = GetIncludeDirectories(proj);
+                }
             } else {
                 runner = new CommunityCppRunner(projectPath, setting.Branch);
                 //runner["cxx.include_directories"] = includePaths; // For V0.9.0
-                runner["cxx.includeDirectories"] = includePaths; // For V0.9.1
+                runner["cxx.includeDirectories"] = GetIncludeDirectories(proj); // For V0.9.1
             }
 
             AddGeneralSetting(runner);
             return runner;
+        }
+
+        private string GetIncludeDirectories(Project proj) {
+            VcxprojParser parser = new VcxprojParser(proj);
+            String includePaths = parser.IncludeDirectoriesJoined;
+            includePaths = includePaths.Replace('\\', '/');
+            return includePaths;
         }
 
         private void AddGeneralSetting(SonarRunner runner) {
