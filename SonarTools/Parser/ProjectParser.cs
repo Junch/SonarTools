@@ -4,7 +4,7 @@ using Microsoft.Build.Evaluation;
 
 namespace SonarTools.Parser {
     public class ProjectParser {
-        private RunnerSetting setting;
+        private readonly RunnerSetting setting;
 
         public ProjectParser(RunnerSetting setting) {
             this.setting = setting;
@@ -15,13 +15,7 @@ namespace SonarTools.Parser {
 
             try {
                 Project proj = new Project(projectPath);
-
-                ProjectProperty prop = proj.GetProperty("Language");
-                if (prop.EvaluatedValue == "C++") {
-                    runner = ParseCpp(proj);
-                } else if(prop.EvaluatedValue == "C#"){
-                    runner = new CSharpRunner(projectPath, setting.Branch);
-                }
+                runner = Parse(proj);
             } catch (Exception e) {
                 Console.WriteLine("Exception Catch: {0}\n", e.Message);
             }
@@ -33,8 +27,22 @@ namespace SonarTools.Parser {
             return runner;
         }
 
-        private SonarRunner ParseCpp(Project proj) {
-            String projectPath = proj.FullPath;
+        private SonarRunner Parse(Project proj) {
+            SonarRunner runner = null;
+
+            ProjectProperty prop = proj.GetProperty("Language");
+            if (prop.EvaluatedValue == "C++") {
+                VcxprojParser parser = new VcxprojParser(proj);
+                runner = ParseCpp(parser);
+            } else if (prop.EvaluatedValue == "C#") {
+                runner = new CSharpRunner(proj.FullPath, setting.Branch);
+            }
+
+            return runner;
+        }
+
+        private SonarRunner ParseCpp(VcxprojParser parser) {
+            String projectPath = parser.project.FullPath;
 
             SonarRunner runner;
             if (setting.CppType == CppPluginType.kCppCommercial) {
@@ -42,22 +50,15 @@ namespace SonarTools.Parser {
                 if (setting.UseBuildWrapper) {
                     runner["cfamily.build-wrapper-output"] = "sonarbuild";
                 } else {
-                    runner["cfamily.library.directories"] = GetIncludeDirectories(proj);
+                    runner["cfamily.library.directories"] = parser.IncludeDirectoriesJoined;
                 }
             } else {
                 runner = new CommunityCppRunner(projectPath, setting.Branch);
                 //runner["cxx.include_directories"] = includePaths; // For V0.9.0
-                runner["cxx.includeDirectories"] = GetIncludeDirectories(proj); // For V0.9.1
+                runner["cxx.includeDirectories"] = parser.IncludeDirectoriesJoined; // For V0.9.1
             }
 
             return runner;
-        }
-
-        private string GetIncludeDirectories(Project proj) {
-            VcxprojParser parser = new VcxprojParser(proj);
-            String includePaths = parser.IncludeDirectoriesJoined;
-            includePaths = includePaths.Replace('\\', '/');
-            return includePaths;
         }
 
         private void AddGeneralSetting(SonarRunner runner) {

@@ -29,7 +29,6 @@ namespace SonarTools.Test {
             runner["Language"] = "c++";
 
             String cmd = runner.SonarCmdArguments;
-            //Assert.AreEqual(@"-Dsonar.language=c++ -Dsonar.fullFilePath=U:\a.vcxproj -Dsonar.projectKey=A_R_a_vcxproj -Dsonar.projectName=$/A/R/a.vcxproj -Dsonar.sources=U:\", cmd);
             Assert.AreEqual(@"-Dsonar.language=c++ -Dsonar.projectKey=A_R_a_vcxproj -Dsonar.projectName=$/A/R/a.vcxproj -Dsonar.sources=.", cmd);
         }
 
@@ -145,15 +144,13 @@ namespace SonarTools.Test {
             var setting = p.GetProperties();
             setting.Sort();
 
-            Assert.AreEqual(8, setting.Count);
-            Assert.AreEqual("-Dsonar.cxx.cppcheck.reportPath=AutoCAD_R_accore_vcxproj.xml", setting[0]);
-            Assert.AreEqual("-Dsonar.cxx.suffixes.headers=.x", setting[1]);
-            Assert.AreEqual("-Dsonar.language=c++", setting[2]);
-            Assert.AreEqual("-Dsonar.projectBaseDir=U:\\", setting[3]);
-            Assert.AreEqual("-Dsonar.projectDescription=\"Last run by community version\"", setting[4]);
-            Assert.AreEqual("-Dsonar.projectKey=AutoCAD_R_accore_vcxproj", setting[5]);
-            Assert.AreEqual("-Dsonar.projectName=$/AutoCAD/R/accore.vcxproj", setting[6]);
-            Assert.AreEqual("-Dsonar.sources=.", setting[7]);
+            Assert.AreEqual(6, setting.Count);
+            Assert.AreEqual("-Dsonar.language=c++", setting[0]);
+            Assert.AreEqual("-Dsonar.projectBaseDir=U:\\", setting[1]);
+            Assert.AreEqual("-Dsonar.projectDescription=\"Last run by community version\"", setting[2]);
+            Assert.AreEqual("-Dsonar.projectKey=AutoCAD_R_accore_vcxproj", setting[3]);
+            Assert.AreEqual("-Dsonar.projectName=$/AutoCAD/R/accore.vcxproj", setting[4]);
+            Assert.AreEqual("-Dsonar.sources=.", setting[5]);
         }
 
         [TestMethod]
@@ -165,7 +162,7 @@ namespace SonarTools.Test {
             };
 
             parser.Setup(m => m.IncludeDirectories).Returns(includes);
-            Assert.AreEqual("\"C:\\dir\\include\",\"..\\include\"", parser.Object.IncludeDirectoriesJoined);
+            Assert.AreEqual("\"C:/dir/include\",\"../include\"", parser.Object.IncludeDirectoriesJoined);
         }
 
         [TestMethod]
@@ -191,5 +188,89 @@ namespace SonarTools.Test {
             parser.Verify(m => m.Parse(It.Is<String>(arg => arg == "file1.vcxproj")), Times.Once);
             parser.Verify(m => m.Parse(It.Is<String>(arg => arg == "file2.vcxproj")), Times.Once);
         }
+
+        [TestMethod]
+        public void ParseCpp_Commercial() {
+            // Mock the VcxProjParser
+            Project pj = new Project();
+            pj.FullPath = @"test.vcxproj";
+            Mock<VcxprojParser> vcParser = new Mock<VcxprojParser>(pj);
+            vcParser.Setup(m => m.IncludeDirectories).Returns(new String[]{
+                @"C:\Test\Include"
+            });
+
+            // Create an ProjectParser instance
+            RunnerSetting setting = new RunnerSetting() {
+                CppType = CppPluginType.kCppCommercial
+            };
+            ProjectParser parser = new ProjectParser(setting);
+            PrivateObject po = new PrivateObject(parser);            
+
+            var r = po.Invoke("ParseCpp", vcParser.Object) as CommercialCppRunner;
+
+            Assert.AreEqual(vcParser.Object.IncludeDirectoriesJoined, r["cfamily.library.directories"]);
+        }
+
+        [TestMethod]
+        public void ParseCpp_Commercial_With_BuildWrap() {
+            // Mock the VcxProjParser
+            Project pj = new Project();
+            pj.FullPath = @"test2.vcxproj";
+            Mock<VcxprojParser> vcParser = new Mock<VcxprojParser>(pj);
+            vcParser.Setup(m => m.IncludeDirectories).Returns(new String[]{
+                @"C:\Test\Include"
+            });
+
+            // Create an ProjectParser instance
+            RunnerSetting setting = new RunnerSetting() {
+                CppType = CppPluginType.kCppCommercial,
+                UseBuildWrapper = true
+            };
+            ProjectParser parser = new ProjectParser(setting);
+            PrivateObject po = new PrivateObject(parser);
+
+            var r = po.Invoke("ParseCpp", vcParser.Object) as CommercialCppRunner;
+
+            Assert.AreEqual("sonarbuild", r["cfamily.build-wrapper-output"]);
+        }
+
+        [TestMethod]
+        public void ParseCpp_Community() {
+            // Mock the VcxProjParser
+            Project pj = new Project();
+            pj.FullPath = @"test3.vcxproj";
+            Mock<VcxprojParser> vcParser = new Mock<VcxprojParser>(pj);
+            vcParser.Setup(m => m.IncludeDirectories).Returns(new String[]{
+                @"C:\Test\Include"
+            });
+
+            // Create an ProjectParser instance
+            RunnerSetting setting = new RunnerSetting() {
+                CppType = CppPluginType.kCppCommunity,
+            };
+            ProjectParser parser = new ProjectParser(setting);
+            PrivateObject po = new PrivateObject(parser);
+
+            var r = po.Invoke("ParseCpp", vcParser.Object) as CommunityCppRunner;
+
+            Assert.AreEqual(vcParser.Object.IncludeDirectoriesJoined, r["cxx.includeDirectories"]);
+        }
+
+        [TestMethod]
+        public void ParseCSharp() {
+            RunnerSetting setting = new RunnerSetting();
+            ProjectParser parser = new ProjectParser(setting);
+            PrivateObject po = new PrivateObject(parser);
+
+            Project pj = new Project();
+            pj.FullPath = @"test4.csproj";
+            pj.SetProperty("Language", "C#");
+
+            var r = po.Invoke("Parse", pj) as CSharpRunner;
+            Assert.IsNotNull(r);
+        }
     }
+
+
+
 }

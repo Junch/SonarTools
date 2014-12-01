@@ -14,8 +14,6 @@ namespace SonarTools.Runner {
             this["ProjectDescription"] = "\"Last run by community version\"";
             this["Language"] = "c++";
             this["ProjectBaseDir"] = DirectoryName;
-            this["cxx.cppcheck.reportPath"] = ProjectKey + ".xml";
-            this["cxx.suffixes.headers"]= ".x"; // Don't parse the header files as the commerical does
         }
 
         public String CppcheckErrorLogFile {
@@ -51,7 +49,6 @@ namespace SonarTools.Runner {
                 proc.EnableRaisingEvents = true;
 
                 WriteLog("############################### Cppcheck begin ###############################");
-                proc.Start();
                 proc.BeginErrorReadLine();
                 proc.BeginOutputReadLine();
                 proc.WaitForExit();
@@ -72,6 +69,7 @@ namespace SonarTools.Runner {
         }
 
         protected override void PreRun() {
+            this["cxx.cppcheck.reportPath"] = ProjectKey + ".xml";
             RunCppCheckCmd();
         }
     }

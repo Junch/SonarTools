@@ -35,7 +35,7 @@ namespace SonarTools.Parser {
                 }
 
                 var includesWithQuates = from x in includes select String.Format("\"{0}\"", x);
-                return String.Join(",", includesWithQuates);
+                return String.Join(",", includesWithQuates).Replace('\\', '/');
             }
         }
 
