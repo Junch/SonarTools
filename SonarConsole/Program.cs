@@ -26,8 +26,9 @@ namespace SonarConsole {
             pm.Run();
             timer.Stop();
 
-            double elapsedSeconds = (double)timer.ElapsedTicks / (double)Stopwatch.Frequency;
-            System.Console.WriteLine("Seconds: {0:0.00}", elapsedSeconds);
+            TimeSpan ts = timer.Elapsed;
+            String output = string.Format("Elapsed: {0}:{1}", Math.Floor(ts.TotalMinutes), ts.ToString("ss\\.ff"));
+            Console.WriteLine(output);
         }
     }
 }
