@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using SonarTools.Runner;
 using SonarTools.Parser;
+using SonarTools.Util;
 using Moq;
 
 namespace SonarTools.Test {
@@ -269,8 +270,68 @@ namespace SonarTools.Test {
             var r = po.Invoke("Parse", pj) as CSharpRunner;
             Assert.IsNotNull(r);
         }
+
+        [TestMethod]
+        public void Read_Normal_XML_Config_File() {
+            String text =
+            @"<Settings>
+              <Branch Name=""Main"" Depot=""$AutoCAD/main"" RunnerHome=""D:/Bin"" ThreadNumber=""4"">
+                  <Projects>
+                    <Project>C:\project1.vcxproj</Project>
+                    <Project>D:\project2.csproj</Project>
+                  </Projects>
+              </Branch>
+              <Branch></Branch>
+            </Settings>";
+            XElement tree = XElement.Parse(text);
+
+            SonarConfig cfg = new SonarConfig();
+            cfg.Read(tree, "Main");
+
+            Assert.AreEqual("$AutoCAD/main", cfg.Depot);
+            Assert.AreEqual("D:/Bin", cfg.RunnerHome);
+            Assert.AreEqual(4, cfg.ThreadNumber);
+            Assert.AreEqual(@"C:\project1.vcxproj", cfg.Projects[0]);
+            Assert.AreEqual(@"D:\project2.csproj", cfg.Projects[1]);
+        }
+
+        [TestMethod]
+        public void Read_XML_Config_File_Without_Attributes() {
+            String text =
+            @"<Settings>
+              <Branch Name=""Main"">
+                  <Projects>
+                    <Project>C:\project1.vcxproj</Project>
+                    <Project>D:\project2.csproj</Project>
+                  </Projects>
+              </Branch>
+            </Settings>";
+            XElement tree = XElement.Parse(text);
+
+            SonarConfig cfg = new SonarConfig();
+            cfg.Read(tree, "Main");
+
+            Assert.AreEqual("", cfg.Depot);
+            Assert.AreEqual("", cfg.RunnerHome);
+            Assert.AreEqual(0, cfg.ThreadNumber);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(System.ArgumentException))]
+        public void Read_XML_Config_File_Name_Not_Found() {
+            String text =
+            @"<Settings>
+              <Branch Name=""Main"">
+                  <Projects>
+                    <Project>C:\project1.vcxproj</Project>
+                    <Project>D:\project2.csproj</Project>
+                  </Projects>
+              </Branch>
+            </Settings>";
+            XElement tree = XElement.Parse(text);
+
+            SonarConfig cfg = new SonarConfig();
+            cfg.Read(tree, "Main2");
+        }
     }
-
-
-
 }
