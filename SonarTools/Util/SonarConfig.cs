@@ -9,6 +9,7 @@ namespace SonarTools.Util {
         public String RunnerHome { get; private set; }
         public int ThreadNumber { get; private set; }
         public List<String> Projects { get; private set; }
+        public CppPluginType CppType { get; private set; }
 
         public void Read(String fileName, String branchName) {
             XElement root = XElement.Load(fileName);
@@ -25,10 +26,21 @@ namespace SonarTools.Util {
             }
             var eBranch = eBranchs.First();
 
+            SetValues(eBranch);
+        }
+
+        private void SetValues(XElement eBranch) {
             Depot = (String)eBranch.Attribute("Depot") ?? String.Empty;
             RunnerHome = (String)eBranch.Attribute("RunnerHome") ?? String.Empty;
             var att = eBranch.Attribute("ThreadNumber");
-            ThreadNumber =  (att == null) ? 0: (int) att;
+            ThreadNumber = (att == null) ? 0 : (int)att;
+            var type = (String)eBranch.Attribute("CppType") ?? String.Empty;
+            CppType = CppPluginType.kCppNotSpecified;
+            if (String.Compare(type, "commerical", true) == 0) {
+                CppType = CppPluginType.kCppCommercial;
+            } else if (String.Compare(type, "community", true) == 0) {
+                CppType = CppPluginType.kCppCommunity;
+            }
 
             Projects = new List<String>();
             var eProjects = eBranch.Element("Projects");

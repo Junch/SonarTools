@@ -10,6 +10,7 @@ namespace SonarTools {
     public enum CppPluginType {
         kCppCommercial,
         kCppCommunity,
+        kCppNotSpecified
     };
 
     public class RunnerSetting {

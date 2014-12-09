@@ -275,7 +275,7 @@ namespace SonarTools.Test {
         public void Read_Normal_XML_Config_File() {
             String text =
             @"<Settings>
-              <Branch Name=""Main"" Depot=""$AutoCAD/main"" RunnerHome=""D:/Bin"" ThreadNumber=""4"">
+              <Branch Name=""Main"" Depot=""$AutoCAD/main"" RunnerHome=""D:/Bin"" ThreadNumber=""4"" CppType=""Commerical"">
                   <Projects>
                     <Project>C:\project1.vcxproj</Project>
                     <Project>D:\project2.csproj</Project>
@@ -291,6 +291,7 @@ namespace SonarTools.Test {
             Assert.AreEqual("$AutoCAD/main", cfg.Depot);
             Assert.AreEqual("D:/Bin", cfg.RunnerHome);
             Assert.AreEqual(4, cfg.ThreadNumber);
+            Assert.AreEqual(CppPluginType.kCppCommercial, cfg.CppType);
             Assert.AreEqual(@"C:\project1.vcxproj", cfg.Projects[0]);
             Assert.AreEqual(@"D:\project2.csproj", cfg.Projects[1]);
         }
@@ -314,6 +315,7 @@ namespace SonarTools.Test {
             Assert.AreEqual("", cfg.Depot);
             Assert.AreEqual("", cfg.RunnerHome);
             Assert.AreEqual(0, cfg.ThreadNumber);
+            Assert.AreEqual(CppPluginType.kCppNotSpecified, cfg.CppType);
         }
 
         [TestMethod]
