@@ -1,10 +1,11 @@
 ﻿using System;
 using SonarTools;
 using System.Diagnostics;
+using SonarTools.Util;
 
 namespace SonarConsole {
     class Program {
-        static void Main(string[] args) {
+        static RunnerSetting GetSettingWithouConfigFile() {
             RunnerSetting setting = new RunnerSetting{
                 Branch = "$/ACAD/R",
                 RunnerHome = "D:/sonar-runner-2.4",
@@ -20,6 +21,27 @@ namespace SonarConsole {
                 //@"U:\components\global\src\objectdbx\dbxapps\AcPointCloud\AcDbPointCloudDbx\AcDbPointCloudDbx.vcxproj"
             };
 
+            return setting;
+        }
+
+        static RunnerSetting GetSettingWithConfigFile() {
+            SonarConfig config = new SonarConfig();
+            config.Read("sonar.xml", "Main");
+
+            RunnerSetting setting = new RunnerSetting();
+            setting.Branch = config.Depot;
+            setting.CppType = config.CppType;
+            setting.ThreadNumber = config.ThreadNumber;
+            setting.RunnerHome = config.RunnerHome;
+            setting.UseBuildWrapper = false;
+            setting.Filepaths = config.Projects.ToArray();
+
+            return setting;
+        }
+
+        static void Main(string[] args) {
+            RunnerSetting setting = GetSettingWithConfigFile();
+            
             SonarRunnerManager pm = new SonarRunnerManager(setting);
             Stopwatch timer = new Stopwatch();
             timer.Start();
