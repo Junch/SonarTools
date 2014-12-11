@@ -275,7 +275,7 @@ namespace SonarTools.Test {
         public void Read_Normal_XML_Config_File() {
             String text =
             @"<Settings>
-              <Branch Name=""Main"" Depot=""$AutoCAD/main"" RunnerHome=""D:/Bin"" ThreadNumber=""4"" CppType=""Commerical"">
+              <Branch Id=""Main"" Depot=""$AutoCAD/main"" RunnerHome=""D:/Bin"" ThreadNumber=""4"" CppType=""Commerical"">
                   <Projects>
                     <Project>C:\project1.vcxproj</Project>
                     <Project>D:\project2.csproj</Project>
@@ -300,7 +300,7 @@ namespace SonarTools.Test {
         public void Read_XML_Config_File_Without_Attributes() {
             String text =
             @"<Settings>
-              <Branch Name=""Main"">
+              <Branch Id=""Main"">
                   <Projects>
                     <Project>C:\project1.vcxproj</Project>
                     <Project>D:\project2.csproj</Project>
@@ -316,6 +316,7 @@ namespace SonarTools.Test {
             Assert.AreEqual("", cfg.RunnerHome);
             Assert.AreEqual(0, cfg.ThreadNumber);
             Assert.AreEqual(CppPluginType.kCppNotSpecified, cfg.CppType);
+            Assert.AreEqual(false, cfg.BuildWrapper);
         }
 
         [TestMethod]
@@ -323,7 +324,7 @@ namespace SonarTools.Test {
         public void Read_XML_Config_File_Name_Not_Found() {
             String text =
             @"<Settings>
-              <Branch Name=""Main"">
+              <Branch Id=""Main"">
                   <Projects>
                     <Project>C:\project1.vcxproj</Project>
                     <Project>D:\project2.csproj</Project>
@@ -340,7 +341,7 @@ namespace SonarTools.Test {
         public void Read_XML_Config_File_With_Skip_Attr() {
             String text =
             @"<Settings>
-              <Branch Name=""Main"">
+              <Branch Id=""Main"">
                   <Projects>
                     <Project Skip=""true"">C:\project1.vcxproj</Project>
                     <Project>D:\project2.csproj</Project>

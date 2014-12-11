@@ -10,19 +10,22 @@ namespace SonarTools.Util {
         public int ThreadNumber { get; private set; }
         public List<String> Projects { get; private set; }
         public CppPluginType CppType { get; private set; }
+        public bool BuildWrapper { get; private set; }
 
-        public void Read(String fileName, String branchName) {
+        public void Read(String fileName, String id) {
             XElement root = XElement.Load(fileName);
-            Read(root, branchName);
+            Read(root, id);
         }
 
-        public void Read(XElement root, String branchName) {
+        public void Read(XElement root, String id) {
             var eBranchs = from item in root.Elements("Branch")
-                           where (String)item.Attribute("Name") == branchName
+                           where (String)item.Attribute("Id") == id
                            select item;
 
             if (eBranchs.Count() == 0) {
-                throw new System.ArgumentException(String.Format("Cannot find the branch: {0}", branchName));
+                throw new System.ArgumentException(String.Format("Cannot find the branch: {0}", id));
+            } else if (eBranchs.Count() > 1) {
+                throw new System.ArgumentException(String.Format("The Id {0} is not unique", id));
             }
             var eBranch = eBranchs.First();
 
@@ -34,9 +37,11 @@ namespace SonarTools.Util {
             RunnerHome = (String)eBranch.Attribute("RunnerHome") ?? String.Empty;
             var att = eBranch.Attribute("ThreadNumber");
             ThreadNumber = (att == null) ? 0 : (int)att;
-            var type = (String)eBranch.Attribute("CppType") ?? String.Empty;
+            att = eBranch.Attribute("BuildWrapper");
+            BuildWrapper = (att == null) ? false: (bool)att;
 
-            CppType = CppPluginType.kCppNotSpecified;
+            CppType = CppPluginType.kCppNotSpecified;            
+            var type = (String)eBranch.Attribute("CppType") ?? String.Empty;
             if (String.Compare(type, "commerical", true) == 0) {
                 CppType = CppPluginType.kCppCommercial;
             } else if (String.Compare(type, "community", true) == 0) {

@@ -24,23 +24,29 @@ namespace SonarConsole {
             return setting;
         }
 
-        static RunnerSetting GetSettingWithConfigFile() {
+        static RunnerSetting GetSettingWithConfigFile(String[] args) {
+            if (args.Length != 2) {
+                System.Console.WriteLine("Useage: SonarSonsole.exe demo.xml branchName");
+                Environment.Exit(1);
+                return null;
+            }
+            
             SonarConfig config = new SonarConfig();
-            config.Read("sonar.xml", "Main");
+            config.Read(args[0], args[1]);
 
             RunnerSetting setting = new RunnerSetting();
             setting.Branch = config.Depot;
             setting.CppType = config.CppType;
             setting.ThreadNumber = config.ThreadNumber;
             setting.RunnerHome = config.RunnerHome;
-            setting.UseBuildWrapper = false;
+            setting.UseBuildWrapper = config.BuildWrapper;
             setting.Filepaths = config.Projects.ToArray();
 
             return setting;
         }
 
         static void Main(string[] args) {
-            RunnerSetting setting = GetSettingWithConfigFile();
+            RunnerSetting setting = GetSettingWithConfigFile(args);
             
             SonarRunnerManager pm = new SonarRunnerManager(setting);
             Stopwatch timer = new Stopwatch();
