@@ -335,5 +335,25 @@ namespace SonarTools.Test {
             SonarConfig cfg = new SonarConfig();
             cfg.Read(tree, "Main2");
         }
+
+        [TestMethod]
+        public void Read_XML_Config_File_With_Skip_Attr() {
+            String text =
+            @"<Settings>
+              <Branch Name=""Main"">
+                  <Projects>
+                    <Project Skip=""true"">C:\project1.vcxproj</Project>
+                    <Project>D:\project2.csproj</Project>
+                  </Projects>
+              </Branch>
+            </Settings>";
+            XElement tree = XElement.Parse(text);
+
+            SonarConfig cfg = new SonarConfig();
+            cfg.Read(tree, "Main");
+
+            Assert.AreEqual(1, cfg.Projects.Count);
+            Assert.AreEqual(@"D:\project2.csproj", cfg.Projects[0]);
+        }
     }
 }

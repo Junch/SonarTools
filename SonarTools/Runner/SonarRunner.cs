@@ -138,6 +138,7 @@ namespace SonarTools.Runner
         protected void WriteLog(String log) {
             if (logWriter != null) { 
                 logWriter.WriteLine(log);
+                logWriter.Flush();
             }
         }
 

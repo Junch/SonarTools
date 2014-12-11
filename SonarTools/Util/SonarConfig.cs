@@ -35,6 +35,7 @@ namespace SonarTools.Util {
             var att = eBranch.Attribute("ThreadNumber");
             ThreadNumber = (att == null) ? 0 : (int)att;
             var type = (String)eBranch.Attribute("CppType") ?? String.Empty;
+
             CppType = CppPluginType.kCppNotSpecified;
             if (String.Compare(type, "commerical", true) == 0) {
                 CppType = CppPluginType.kCppCommercial;
@@ -42,9 +43,12 @@ namespace SonarTools.Util {
                 CppType = CppPluginType.kCppCommunity;
             }
 
+            var v = from item in eBranch.Element("Projects").Elements("Project")
+                    where item.Attribute("Skip") == null || (bool)item.Attribute("Skip") == false
+                    select item;
+
             Projects = new List<String>();
-            var eProjects = eBranch.Element("Projects");
-            foreach (XElement e in eProjects.Elements("Project")) {
+            foreach (XElement e in v) {
                 Projects.Add(e.Value);
             }
         }
