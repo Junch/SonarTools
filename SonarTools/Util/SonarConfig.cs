@@ -10,7 +10,7 @@ namespace SonarTools.Util {
         public int ThreadNumber { get; private set; }
         public List<String> Projects { get; private set; }
         public CppPluginType CppType { get; private set; }
-        public bool BuildWrapper { get; private set; }
+        public String BuildWrapper { get; private set; }
 
         public void Read(String fileName, String id) {
             XElement root = XElement.Load(fileName);
@@ -37,9 +37,8 @@ namespace SonarTools.Util {
             RunnerHome = (String)eBranch.Attribute("RunnerHome") ?? String.Empty;
             var att = eBranch.Attribute("ThreadNumber");
             ThreadNumber = (att == null) ? 0 : (int)att;
-            att = eBranch.Attribute("BuildWrapper");
-            BuildWrapper = (att == null) ? false: (bool)att;
-
+            BuildWrapper = (String)eBranch.Attribute("BuildWrapper") ?? String.Empty;
+     
             CppType = CppPluginType.kCppNotSpecified;            
             var type = (String)eBranch.Attribute("CppType") ?? String.Empty;
             if (String.Compare(type, "commerical", true) == 0) {

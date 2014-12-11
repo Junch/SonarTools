@@ -47,10 +47,10 @@ namespace SonarTools.Parser {
             SonarRunner runner;
             if (setting.CppType == CppPluginType.kCppCommercial) {
                 runner = new CommercialCppRunner(projectPath, setting.Branch);
-                if (setting.UseBuildWrapper) {
-                    runner["cfamily.build-wrapper-output"] = "sonarbuild";
-                } else {
+                if (String.IsNullOrEmpty(setting.BuildWrapper)) {
                     runner["cfamily.library.directories"] = parser.IncludeDirectoriesJoined;
+                } else {
+                    runner["cfamily.build-wrapper-output"] = setting.BuildWrapper;
                 }
             } else {
                 runner = new CommunityCppRunner(projectPath, setting.Branch);

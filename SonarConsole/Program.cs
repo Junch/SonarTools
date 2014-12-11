@@ -39,7 +39,7 @@ namespace SonarConsole {
             setting.CppType = config.CppType;
             setting.ThreadNumber = config.ThreadNumber;
             setting.RunnerHome = config.RunnerHome;
-            setting.UseBuildWrapper = config.BuildWrapper;
+            setting.BuildWrapper = config.BuildWrapper;
             setting.Filepaths = config.Projects.ToArray();
 
             return setting;

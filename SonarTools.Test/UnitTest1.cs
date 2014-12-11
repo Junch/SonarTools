@@ -225,7 +225,7 @@ namespace SonarTools.Test {
             // Create an ProjectParser instance
             RunnerSetting setting = new RunnerSetting() {
                 CppType = CppPluginType.kCppCommercial,
-                UseBuildWrapper = true
+                BuildWrapper = "sonarbuild"
             };
             ProjectParser parser = new ProjectParser(setting);
             PrivateObject po = new PrivateObject(parser);
@@ -316,7 +316,7 @@ namespace SonarTools.Test {
             Assert.AreEqual("", cfg.RunnerHome);
             Assert.AreEqual(0, cfg.ThreadNumber);
             Assert.AreEqual(CppPluginType.kCppNotSpecified, cfg.CppType);
-            Assert.AreEqual(false, cfg.BuildWrapper);
+            Assert.AreEqual("", cfg.BuildWrapper);
         }
 
         [TestMethod]
