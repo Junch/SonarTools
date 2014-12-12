@@ -40,6 +40,7 @@ namespace SonarConsole {
             setting.ThreadNumber = config.ThreadNumber;
             setting.RunnerHome = config.RunnerHome;
             setting.BuildWrapper = config.BuildWrapper;
+            setting.MaxHeapSize = config.MaxHeapSize;
             setting.Filepaths = config.Projects.ToArray();
 
             return setting;

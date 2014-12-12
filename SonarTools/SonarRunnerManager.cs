@@ -21,6 +21,7 @@ namespace SonarTools {
         public String Branch;
         public String RunnerHome;
         public String[] Filepaths;
+        public String MaxHeapSize = "512m";
     }
 
     public class SonarRunnerManager {
@@ -63,9 +64,9 @@ namespace SonarTools {
             Task.WaitAll(tasks.ToArray());
         }
 
-        private static void IncreaseHeapsize() {
+        private void IncreaseHeapsize() {
             String envName = "SONAR_RUNNER_OPTS";
-            String envValue = "-Xmx512m -XX:MaxPermSize=128m";
+            String envValue = String.Format("-Xmx{0}", setting.MaxHeapSize);
 
             if (Environment.GetEnvironmentVariable(envName) == null) { 
                 Environment.SetEnvironmentVariable(envName, envValue);

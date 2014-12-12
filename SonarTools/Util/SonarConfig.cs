@@ -11,6 +11,7 @@ namespace SonarTools.Util {
         public List<String> Projects { get; private set; }
         public CppPluginType CppType { get; private set; }
         public String BuildWrapper { get; private set; }
+        public String MaxHeapSize { get; private set; }
 
         public void Read(String fileName, String id) {
             XElement root = XElement.Load(fileName);
@@ -38,6 +39,7 @@ namespace SonarTools.Util {
             var att = eBranch.Attribute("ThreadNumber");
             ThreadNumber = (att == null) ? 0 : (int)att;
             BuildWrapper = (String)eBranch.Attribute("BuildWrapper") ?? String.Empty;
+            MaxHeapSize = (String)eBranch.Attribute("MaxHeapSize") ?? String.Empty;
      
             CppType = CppPluginType.kCppNotSpecified;            
             var type = (String)eBranch.Attribute("CppType") ?? String.Empty;
