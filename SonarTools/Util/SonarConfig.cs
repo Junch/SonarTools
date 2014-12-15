@@ -5,58 +5,54 @@ using System.Xml.Linq;
 
 namespace SonarTools.Util {
     public class SonarConfig {
-        public String Depot { get; private set; }
-        public String RunnerHome { get; private set; }
-        public int ThreadNumber { get; private set; }
-        public List<String> Projects { get; private set; }
-        public CppPluginType CppType { get; private set; }
-        public String BuildWrapper { get; private set; }
-        public String MaxHeapSize { get; private set; }
-
-        public void Read(String fileName, String id) {
+        public RunnerSetting Read(String fileName, String id) {
             XElement root = XElement.Load(fileName);
-            Read(root, id);
+            return Read(root, id);
         }
 
-        public void Read(XElement root, String id) {
+        public RunnerSetting Read(XElement root, String id) {
             var eBranchs = from item in root.Elements("Branch")
                            where (String)item.Attribute("Id") == id
                            select item;
 
             if (eBranchs.Count() == 0) {
-                throw new System.ArgumentException(String.Format("Cannot find the branch: {0}", id));
+                throw new System.ArgumentException(String.Format("Cannot find the Id: {0}", id));
             } else if (eBranchs.Count() > 1) {
                 throw new System.ArgumentException(String.Format("The Id {0} is not unique", id));
             }
             var eBranch = eBranchs.First();
 
-            SetValues(eBranch);
+            return GetValues(eBranch);
         }
 
-        private void SetValues(XElement eBranch) {
-            Depot = (String)eBranch.Attribute("Depot") ?? String.Empty;
-            RunnerHome = (String)eBranch.Attribute("RunnerHome") ?? String.Empty;
+        private RunnerSetting GetValues(XElement eBranch) {
+            RunnerSetting setting = new RunnerSetting();
+
+            setting.Branch = (String)eBranch.Attribute("Depot") ?? String.Empty;
+            setting.RunnerHome = (String)eBranch.Attribute("RunnerHome") ?? String.Empty;
             var att = eBranch.Attribute("ThreadNumber");
-            ThreadNumber = (att == null) ? 0 : (int)att;
-            BuildWrapper = (String)eBranch.Attribute("BuildWrapper") ?? String.Empty;
-            MaxHeapSize = (String)eBranch.Attribute("MaxHeapSize") ?? String.Empty;
-     
-            CppType = CppPluginType.kCppNotSpecified;            
-            var type = (String)eBranch.Attribute("CppType") ?? String.Empty;
-            if (String.Compare(type, "commerical", true) == 0) {
-                CppType = CppPluginType.kCppCommercial;
-            } else if (String.Compare(type, "community", true) == 0) {
-                CppType = CppPluginType.kCppCommunity;
+            if (att != null) {
+                setting.ThreadNumber = (int)att;
+            }
+            setting.BuildWrapper = (String)eBranch.Attribute("BuildWrapper") ?? setting.BuildWrapper;
+            setting.MaxHeapSize = (String)eBranch.Attribute("MaxHeapSize") ?? setting.MaxHeapSize;
+
+            var type = (String)eBranch.Attribute("CppType");
+            if (type != null && String.Compare(type, "commerical", true) == 0) {
+                setting.CppType = CppPluginType.kCppCommercial;
             }
 
             var v = from item in eBranch.Element("Projects").Elements("Project")
                     where item.Attribute("Skip") == null || (bool)item.Attribute("Skip") == false
                     select item;
 
-            Projects = new List<String>();
+            var projects = new List<String>();
             foreach (XElement e in v) {
-                Projects.Add(e.Value);
+                projects.Add(e.Value);
             }
+            setting.Filepaths = projects.ToArray();
+
+            return setting;
         }
     }
 }

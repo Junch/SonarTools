@@ -32,17 +32,7 @@ namespace SonarConsole {
             }
             
             SonarConfig config = new SonarConfig();
-            config.Read(args[0], args[1]);
-
-            RunnerSetting setting = new RunnerSetting();
-            setting.Branch = config.Depot;
-            setting.CppType = config.CppType;
-            setting.ThreadNumber = config.ThreadNumber;
-            setting.RunnerHome = config.RunnerHome;
-            setting.BuildWrapper = config.BuildWrapper;
-            setting.MaxHeapSize = config.MaxHeapSize;
-            setting.Filepaths = config.Projects.ToArray();
-
+            RunnerSetting setting = config.Read(args[0], args[1]);
             return setting;
         }
 

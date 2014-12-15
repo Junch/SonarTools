@@ -286,15 +286,15 @@ namespace SonarTools.Test {
             XElement tree = XElement.Parse(text);
 
             SonarConfig cfg = new SonarConfig();
-            cfg.Read(tree, "Main");
+            RunnerSetting setting = cfg.Read(tree, "Main");
 
-            Assert.AreEqual("$AutoCAD/main", cfg.Depot);
-            Assert.AreEqual("D:/Bin", cfg.RunnerHome);
-            Assert.AreEqual(4, cfg.ThreadNumber);
-            Assert.AreEqual(CppPluginType.kCppCommercial, cfg.CppType);
-            Assert.AreEqual("2G", cfg.MaxHeapSize);
-            Assert.AreEqual(@"C:\project1.vcxproj", cfg.Projects[0]);
-            Assert.AreEqual(@"D:\project2.csproj", cfg.Projects[1]);
+            Assert.AreEqual("$AutoCAD/main", setting.Branch);
+            Assert.AreEqual("D:/Bin", setting.RunnerHome);
+            Assert.AreEqual(4, setting.ThreadNumber);
+            Assert.AreEqual(CppPluginType.kCppCommercial, setting.CppType);
+            Assert.AreEqual("2G", setting.MaxHeapSize);
+            Assert.AreEqual(@"C:\project1.vcxproj", setting.Filepaths[0]);
+            Assert.AreEqual(@"D:\project2.csproj", setting.Filepaths[1]);
         }
 
         [TestMethod]
@@ -311,14 +311,14 @@ namespace SonarTools.Test {
             XElement tree = XElement.Parse(text);
 
             SonarConfig cfg = new SonarConfig();
-            cfg.Read(tree, "Main");
+            RunnerSetting setting = cfg.Read(tree, "Main");
 
-            Assert.AreEqual("", cfg.Depot);
-            Assert.AreEqual("", cfg.RunnerHome);
-            Assert.AreEqual(0, cfg.ThreadNumber);
-            Assert.AreEqual(CppPluginType.kCppNotSpecified, cfg.CppType);
-            Assert.AreEqual("", cfg.BuildWrapper);
-            Assert.AreEqual("", cfg.MaxHeapSize);
+            Assert.AreEqual("", setting.Branch);
+            Assert.AreEqual("", setting.RunnerHome);
+            Assert.AreEqual(1, setting.ThreadNumber);
+            Assert.AreEqual(CppPluginType.kCppCommunity, setting.CppType);
+            Assert.AreEqual("", setting.BuildWrapper);
+            Assert.AreEqual("512m", setting.MaxHeapSize);
         }
 
         [TestMethod]
@@ -353,10 +353,10 @@ namespace SonarTools.Test {
             XElement tree = XElement.Parse(text);
 
             SonarConfig cfg = new SonarConfig();
-            cfg.Read(tree, "Main");
+            RunnerSetting setting = cfg.Read(tree, "Main");
 
-            Assert.AreEqual(1, cfg.Projects.Count);
-            Assert.AreEqual(@"D:\project2.csproj", cfg.Projects[0]);
+            Assert.AreEqual(1, setting.Filepaths.Length);
+            Assert.AreEqual(@"D:\project2.csproj", setting.Filepaths[0]);
         }
     }
 }
