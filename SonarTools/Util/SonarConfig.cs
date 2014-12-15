@@ -46,11 +46,17 @@ namespace SonarTools.Util {
                     where item.Attribute("Skip") == null || (bool)item.Attribute("Skip") == false
                     select item;
 
-            var projects = new List<String>();
+            var projects = new List<ProjectSetting>();
             foreach (XElement e in v) {
-                projects.Add(e.Value);
+                var proj = new ProjectSetting() {
+                    Filepath = e.Value,
+                    BuildWrapper = (String)e.Attribute("BuildWrapper") ?? setting.BuildWrapper,
+                    MaxHeapSize = (String)e.Attribute("MaxHeapSize") ?? setting.MaxHeapSize
+                };
+
+                projects.Add(proj);
             }
-            setting.Filepaths = projects.ToArray();
+            setting.Projects = projects.ToArray();
 
             return setting;
         }

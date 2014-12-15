@@ -12,9 +12,9 @@ namespace SonarConsole {
                 ThreadNumber = 4,
             };
 
-            setting.Filepaths = new String[] {
-                @"U:\components\global\src\AcBrowser\AcHelpWrapper\AcHelpWrapper.vcxproj",
-                @"U:\components\global\src\crxapps\rect\rectang.vcxproj",
+            setting.Projects = new ProjectSetting[] {
+                new ProjectSetting{Filepath = @"U:\components\global\src\AcBrowser\AcHelpWrapper\AcHelpWrapper.vcxproj"},
+                new ProjectSetting{Filepath = @"U:\components\global\src\crxapps\rect\rectang.vcxproj"},
                 //@"D:\Github\Cplusplus\c11test\c11test.vcxproj",
                 //@"U:\develop\global\src\coreapps\textfind\TextFind.vcxproj",
                 //@"D:\Github\wtl\example\NetworkDrive\NetworkDrive.vcxproj",

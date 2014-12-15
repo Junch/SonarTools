@@ -171,8 +171,9 @@ namespace SonarTools.Test {
             RunnerSetting setting = new RunnerSetting{
                 RunnerHome = "home",
                 ThreadNumber = 4,
-                Filepaths = new String[]{
-                    "file1.vcxproj", "file2.vcxproj"
+                Projects = new ProjectSetting[]{
+                    new ProjectSetting{Filepath = "file1.vcxproj"}, 
+                    new ProjectSetting{Filepath = "file2.vcxproj"},
                 }
             };
 
@@ -293,8 +294,8 @@ namespace SonarTools.Test {
             Assert.AreEqual(4, setting.ThreadNumber);
             Assert.AreEqual(CppPluginType.kCppCommercial, setting.CppType);
             Assert.AreEqual("2G", setting.MaxHeapSize);
-            Assert.AreEqual(@"C:\project1.vcxproj", setting.Filepaths[0]);
-            Assert.AreEqual(@"D:\project2.csproj", setting.Filepaths[1]);
+            Assert.AreEqual(@"C:\project1.vcxproj", setting.Projects[0].Filepath);
+            Assert.AreEqual(@"D:\project2.csproj", setting.Projects[1].Filepath);
         }
 
         [TestMethod]
@@ -355,8 +356,30 @@ namespace SonarTools.Test {
             SonarConfig cfg = new SonarConfig();
             RunnerSetting setting = cfg.Read(tree, "Main");
 
-            Assert.AreEqual(1, setting.Filepaths.Length);
-            Assert.AreEqual(@"D:\project2.csproj", setting.Filepaths[0]);
+            Assert.AreEqual(1, setting.Projects.Length);
+            Assert.AreEqual(@"D:\project2.csproj", setting.Projects[0].Filepath);
+        }
+
+        [TestMethod]
+        public void Read_XML_Config_File_Project_Attr() {
+            String text =
+            @"<Settings>
+              <Branch Id=""Main"" MaxHeapSize=""4G"">
+                  <Projects>
+                    <Project MaxHeapSize=""1G"" BuildWrapper="".project1.vcxproj"">C:\project1.vcxproj</Project>
+                    <Project>D:\project2.csproj</Project>
+                  </Projects>
+              </Branch>
+            </Settings>";
+            XElement tree = XElement.Parse(text);
+
+            SonarConfig cfg = new SonarConfig();
+            RunnerSetting setting = cfg.Read(tree, "Main");
+
+            Assert.AreEqual(2, setting.Projects.Length);
+            Assert.AreEqual(@".project1.vcxproj", setting.Projects[0].BuildWrapper);
+            Assert.AreEqual(@"1G", setting.Projects[0].MaxHeapSize);
+            Assert.AreEqual(@"4G", setting.Projects[1].MaxHeapSize);
         }
     }
 }

@@ -13,6 +13,12 @@ namespace SonarTools {
         kCppNotSpecified
     };
 
+    public class ProjectSetting {
+        public String Filepath;
+        public String MaxHeapSize;
+        public String BuildWrapper;
+    }
+
     public class RunnerSetting {
         public CppPluginType CppType = CppPluginType.kCppCommunity;
         public String BuildWrapper = "";
@@ -20,7 +26,7 @@ namespace SonarTools {
         public int ThreadNumber = 1;
         public String Branch;
         public String RunnerHome;
-        public String[] Filepaths;
+        public ProjectSetting[] Projects;
         public String MaxHeapSize = "512m";
     }
 
@@ -40,8 +46,8 @@ namespace SonarTools {
             var coll = new BlockingCollection<SonarRunner>();
 
             var taskAdd = Task.Factory.StartNew(() => {
-                foreach (var file in setting.Filepaths) {
-                    var v = parser.Parse(file);
+                foreach (var project in setting.Projects) {
+                    var v = parser.Parse(project.Filepath);
                     if (v != null) { 
                         coll.Add(v);
                     }
