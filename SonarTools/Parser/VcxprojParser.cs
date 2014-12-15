@@ -4,6 +4,7 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Evaluation;
+using System.IO;
 
 namespace SonarTools.Parser {
     public class VcxprojParser {
@@ -37,6 +38,60 @@ namespace SonarTools.Parser {
                 var includesWithQuates = from x in includes select String.Format("\"{0}\"", x);
                 return String.Join(",", includesWithQuates).Replace('\\', '/');
             }
+        }
+
+        public virtual List<String> GetSubDirsInProjectFolders(){
+            List<String> folders = new List<String>();
+            DirectoryInfo diParent = new DirectoryInfo(project.DirectoryPath);
+
+            foreach (DirectoryInfo diChild in diParent.GetDirectories()) {
+                folders.Add(diChild.Name);
+            }
+
+            return folders;
+        }
+
+        public IEnumerable<String> GetSrcFolders() {
+            var items = project.GetItems("ClCompile");
+            List<String> folders = new List<string>();
+            foreach (var item in items) {
+                String fileName = item.EvaluatedInclude;
+                String[] parts = fileName.Split('\\', '/');
+                if (parts.Length > 1) {
+                    if (!folders.Contains(parts[0])) {
+                        folders.Add(parts[0]);
+                    }
+                }
+            }
+
+            List<String> subDirs = GetSubDirsInProjectFolders();
+            var arr = folders.Intersect(subDirs);
+            List<String> ret = new List<String>();
+            foreach (var item in arr) {
+                ret.Add(item);
+            }
+
+            return ret;
+        }
+
+        public IEnumerable<String> GetExclusionFolders() {
+            List<String> subDirs = GetSubDirsInProjectFolders();
+
+            var items = project.GetItems("ClCompile");
+            foreach (var item in items) {
+                String fileName = item.EvaluatedInclude;
+                String[] parts = fileName.Split('\\', '/');
+                if (parts.Length > 1) {
+                    if (subDirs.Contains(parts[0])) {
+                        subDirs.Remove(parts[0]);
+                    }
+                }
+            }
+
+            var newdirs = from e in subDirs
+                          select String.Format("\"{0}/*\"",e);
+
+            return newdirs;
         }
 
         #region The implemenation details

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -118,6 +119,35 @@ namespace SonarTools.Test {
         }
 
         [TestMethod]
+        public void Get_Sources_Folders_From_VcxProject() {
+            Project proj = new Project();
+            proj.AddItem("ClCompile", @"f.cpp");
+            proj.AddItem("ClCompile", @"abc\a.cpp");
+            proj.AddItem("ClCompile", @"123\567\1.cpp");
+            Mock<VcxprojParser> parser = new Mock<VcxprojParser>(proj);
+            parser.Setup(m => m.GetSubDirsInProjectFolders()).Returns(new List<String> {"abc", "123"});
+
+            var folders = parser.Object.GetSrcFolders();
+            Assert.AreEqual(2, folders.Count());
+            Assert.AreEqual("abc", folders.ElementAt(0));
+            Assert.AreEqual("123", folders.ElementAt(1));
+        }
+
+        [TestMethod]
+        public void Get_Exclusion_Folders_From_VcxProject() {
+            Project proj = new Project();
+            proj.AddItem("ClCompile", @"f.cpp");
+            proj.AddItem("ClCompile", @"abc\a.cpp");
+            proj.AddItem("ClCompile", @"123\567\1.cpp");
+            Mock<VcxprojParser> parser = new Mock<VcxprojParser>(proj);
+            parser.Setup(m => m.GetSubDirsInProjectFolders()).Returns(new List<String> { "abc", "def gh", "123" });
+
+            var folders = parser.Object.GetExclusionFolders();
+            Assert.AreEqual(1, folders.Count());
+            Assert.AreEqual("\"def gh/*\"", folders.First());
+        }
+
+        [TestMethod]
         public void Get_DepotName_From_Path() {
             String fullFilePath = @"U:\components\global\src\coredll\accore.vcxproj";
             String branch = @"$/AutoCAD/M-Branches/R";
@@ -222,6 +252,7 @@ namespace SonarTools.Test {
             vcParser.Setup(m => m.IncludeDirectories).Returns(new String[]{
                 @"C:\Test\Include"
             });
+            vcParser.Setup(m => m.GetSubDirsInProjectFolders()).Returns(new List<String>{});
 
             // Create an ProjectParser instance
             RunnerSetting setting = new RunnerSetting() {

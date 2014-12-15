@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using SonarTools.Runner;
 using Microsoft.Build.Evaluation;
 
@@ -51,6 +52,12 @@ namespace SonarTools.Parser {
                     runner["cfamily.library.directories"] = parser.IncludeDirectoriesJoined;
                 } else {
                     runner["cfamily.build-wrapper-output"] = ps.BuildWrapper;
+                    runner["working.directory"] = ps.BuildWrapper + "_work";
+                    var dirs = parser.GetExclusionFolders();
+
+                    if (dirs != null && dirs.Count() > 0) {
+                        runner["exclusions"] = String.Join(",", dirs.ToArray());
+                    }
                 }
             } else {
                 runner = new CommunityCppRunner(projectPath, setting.Branch);

@@ -56,7 +56,8 @@ namespace SonarTools.Runner
 
         public String LogFilepath {
             get {
-                return String.Format("{0}\\{1}.log", DirectoryName, ProjectKey);
+                String file = Path.GetFileName(FullFilePath);
+                return String.Format("{0}\\{1}.log", DirectoryName, file);
             }
         }
 
@@ -96,8 +97,9 @@ namespace SonarTools.Runner
         }
 
         public bool RunSonarCmd(String runnerHome) {
+            // -e -X debug parameter
             String arguments = String.Format("/c {0}/bin/sonar-runner.bat {1}", runnerHome, SonarCmdArguments);
-            WriteLog(String.Format("Sonar-runner arguments: {0}", SonarCmdArguments));
+            WriteLog(String.Format("Sonar-runner {0}", SonarCmdArguments));
 
             ProcessStartInfo psi = new ProcessStartInfo();
             psi.FileName = "cmd.exe";
@@ -151,6 +153,13 @@ namespace SonarTools.Runner
         }
 
         public virtual void Run(String runnerHome) {
+            // http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx
+            // In the Windows API, the maximum length for a path is MAX_PATH, which is defined as 260 characters.
+            const int MAX_PATH = 260;
+            if (LogFilepath.Length > MAX_PATH) {
+                Console.WriteLine("Error: The path {0} is too long", LogFilepath);
+            }
+
             using (logWriter = File.CreateText(LogFilepath)) {
                 AddSymbolLink(LogFilepath);
 
@@ -158,7 +167,7 @@ namespace SonarTools.Runner
                 PreRun();
                 bool bSuccess = RunSonarCmd(runnerHome);
                 PosRun();
-                if (bSuccess) { 
+                if (bSuccess) {
                     System.Console.WriteLine("<== {0}", DepotName);
                 } else {
                     Console.ForegroundColor = ConsoleColor.DarkRed;
