@@ -47,7 +47,7 @@ namespace SonarTools {
 
             var taskAdd = Task.Factory.StartNew(() => {
                 foreach (var project in setting.Projects) {
-                    var v = parser.Parse(project.Filepath);
+                    var v = parser.Parse(project);
                     if (v != null) { 
                         coll.Add(v);
                     }

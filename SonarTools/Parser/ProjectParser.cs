@@ -10,12 +10,12 @@ namespace SonarTools.Parser {
             this.setting = setting;
         }
 
-        public virtual SonarRunner Parse(String projectPath) {
+        public virtual SonarRunner Parse(ProjectSetting ps) {
             SonarRunner runner = null ;
 
             try {
-                Project proj = new Project(projectPath);
-                runner = Parse(proj);
+                Project proj = new Project(ps.Filepath);
+                runner = Parse(proj, ps);
             } catch (Exception e) {
                 Console.WriteLine("Exception Catch: {0}\n", e.Message);
             }
@@ -27,13 +27,13 @@ namespace SonarTools.Parser {
             return runner;
         }
 
-        private SonarRunner Parse(Project proj) {
+        private SonarRunner Parse(Project proj, ProjectSetting ps) {
             SonarRunner runner = null;
 
             ProjectProperty prop = proj.GetProperty("Language");
             if (prop.EvaluatedValue == "C++") {
                 VcxprojParser parser = new VcxprojParser(proj);
-                runner = ParseCpp(parser);
+                runner = ParseCpp(parser, ps);
             } else if (prop.EvaluatedValue == "C#") {
                 runner = new CSharpRunner(proj.FullPath, setting.Branch);
             }
@@ -41,7 +41,7 @@ namespace SonarTools.Parser {
             return runner;
         }
 
-        private SonarRunner ParseCpp(VcxprojParser parser) {
+        private SonarRunner ParseCpp(VcxprojParser parser, ProjectSetting ps) {
             String projectPath = parser.project.FullPath;
 
             SonarRunner runner;
@@ -50,7 +50,7 @@ namespace SonarTools.Parser {
                 if (String.IsNullOrEmpty(setting.BuildWrapper)) {
                     runner["cfamily.library.directories"] = parser.IncludeDirectoriesJoined;
                 } else {
-                    runner["cfamily.build-wrapper-output"] = setting.BuildWrapper;
+                    runner["cfamily.build-wrapper-output"] = ps.BuildWrapper;
                 }
             } else {
                 runner = new CommunityCppRunner(projectPath, setting.Branch);

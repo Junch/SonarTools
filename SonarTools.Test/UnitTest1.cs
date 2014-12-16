@@ -179,16 +179,16 @@ namespace SonarTools.Test {
 
             Mock<SonarRunner> runner = new Mock<SonarRunner>("temp.vcxproj", "");
             Mock<ProjectParser> parser = new Mock<ProjectParser>(setting);
-            parser.Setup(m => m.Parse(It.IsAny<String>())).Returns(runner.Object);
+            parser.Setup(m => m.Parse(It.IsAny<ProjectSetting>())).Returns(runner.Object);
 
             SonarRunnerManager manager = new SonarRunnerManager(setting, parser.Object);
             manager.Run();
 
             runner.Verify(m => m.Run(It.Is<String>(arg => arg == "home")), Times.Exactly(2));
 
-            parser.Verify(m => m.Parse(It.IsAny<String>()), Times.Exactly(2));
-            parser.Verify(m => m.Parse(It.Is<String>(arg => arg == "file1.vcxproj")), Times.Once);
-            parser.Verify(m => m.Parse(It.Is<String>(arg => arg == "file2.vcxproj")), Times.Once);
+            parser.Verify(m => m.Parse(It.IsAny<ProjectSetting>()), Times.Exactly(2));
+            parser.Verify(m => m.Parse(It.Is<ProjectSetting>(arg => arg.Filepath == "file1.vcxproj")), Times.Once);
+            parser.Verify(m => m.Parse(It.Is<ProjectSetting>(arg => arg.Filepath == "file2.vcxproj")), Times.Once);
         }
 
         [TestMethod]
@@ -208,7 +208,7 @@ namespace SonarTools.Test {
             ProjectParser parser = new ProjectParser(setting);
             PrivateObject po = new PrivateObject(parser);            
 
-            var r = po.Invoke("ParseCpp", vcParser.Object) as CommercialCppRunner;
+            var r = po.Invoke("ParseCpp", vcParser.Object, new ProjectSetting()) as CommercialCppRunner;
 
             Assert.AreEqual(vcParser.Object.IncludeDirectoriesJoined, r["cfamily.library.directories"]);
         }
@@ -231,9 +231,9 @@ namespace SonarTools.Test {
             ProjectParser parser = new ProjectParser(setting);
             PrivateObject po = new PrivateObject(parser);
 
-            var r = po.Invoke("ParseCpp", vcParser.Object) as CommercialCppRunner;
+            var r = po.Invoke("ParseCpp", vcParser.Object, new ProjectSetting {BuildWrapper ="abc" }) as CommercialCppRunner;
 
-            Assert.AreEqual("sonarbuild", r["cfamily.build-wrapper-output"]);
+            Assert.AreEqual("abc", r["cfamily.build-wrapper-output"]);
         }
 
         [TestMethod]
@@ -253,7 +253,7 @@ namespace SonarTools.Test {
             ProjectParser parser = new ProjectParser(setting);
             PrivateObject po = new PrivateObject(parser);
 
-            var r = po.Invoke("ParseCpp", vcParser.Object) as CommunityCppRunner;
+            var r = po.Invoke("ParseCpp", vcParser.Object, new ProjectSetting()) as CommunityCppRunner;
 
             Assert.AreEqual(vcParser.Object.IncludeDirectoriesJoined, r["cxx.includeDirectories"]);
         }
@@ -268,7 +268,7 @@ namespace SonarTools.Test {
             pj.FullPath = @"test4.csproj";
             pj.SetProperty("Language", "C#");
 
-            var r = po.Invoke("Parse", pj) as CSharpRunner;
+            var r = po.Invoke("Parse", pj, new ProjectSetting()) as CSharpRunner;
             Assert.IsNotNull(r);
         }
 
