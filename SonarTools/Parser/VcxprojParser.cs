@@ -77,7 +77,8 @@ namespace SonarTools.Parser {
         public IEnumerable<String> GetExclusionFolders() {
             List<String> subDirs = GetSubDirsInProjectFolders();
 
-            for (int i = 0; i < subDirs.Count; ) {
+            int i = 0;
+            while (i < subDirs.Count) {
                 if (subDirs[i].StartsWith("sonarbuild_")) {
                     subDirs.RemoveAt(i);
                 } else {

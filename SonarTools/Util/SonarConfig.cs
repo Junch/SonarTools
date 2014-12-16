@@ -56,7 +56,7 @@ namespace SonarTools.Util {
         private void GetDataFromProjects(XElement eProjects, RunnerSetting setting, List<ProjectSetting> projects) {
             if (eProjects != null) {
                 var v = from item in eProjects.Elements("Project")
-                        where item.Attribute("Skip") == null || (bool)item.Attribute("Skip") == false
+                        where item.Attribute("Skip") == null || !(bool)item.Attribute("Skip")
                         select item;
 
                 foreach (XElement e in v) {
@@ -74,7 +74,7 @@ namespace SonarTools.Util {
         private void GetDataFromFolders(XElement eFolders, List<ProjectSetting> projects) {
             if (eFolders != null) {
                 var u = from item in eFolders.Elements("Folder")
-                        where item.Attribute("Skip") == null || (bool)item.Attribute("Skip") == false
+                        where item.Attribute("Skip") == null || !(bool)item.Attribute("Skip")
                         select item;
 
                 foreach (XElement e in u) {
@@ -117,9 +117,7 @@ namespace SonarTools.Util {
 
                     if (a.Count() == 0) {
                         arr.Add(proj);
-                    } else {
-                        System.Console.WriteLine("Warning: The {0} added previously", fi.FullName);
-                    }
+                    } 
                 }
             }
         }
