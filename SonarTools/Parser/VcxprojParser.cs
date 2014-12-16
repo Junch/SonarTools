@@ -77,6 +77,14 @@ namespace SonarTools.Parser {
         public IEnumerable<String> GetExclusionFolders() {
             List<String> subDirs = GetSubDirsInProjectFolders();
 
+            for (int i = 0; i < subDirs.Count; ) {
+                if (subDirs[i].StartsWith("sonarbuild_")) {
+                    subDirs.RemoveAt(i);
+                } else {
+                    i++;
+                }
+            }
+
             var items = project.GetItems("ClCompile");
             foreach (var item in items) {
                 String fileName = item.EvaluatedInclude;
@@ -89,7 +97,7 @@ namespace SonarTools.Parser {
             }
 
             var newdirs = from e in subDirs
-                          select String.Format("\"{0}/*\"",e);
+                          select String.Format("\"{0}/**/*\"",e);
 
             return newdirs;
         }

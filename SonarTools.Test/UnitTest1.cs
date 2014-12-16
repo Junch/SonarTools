@@ -144,7 +144,21 @@ namespace SonarTools.Test {
 
             var folders = parser.Object.GetExclusionFolders();
             Assert.AreEqual(1, folders.Count());
-            Assert.AreEqual("\"def gh/*\"", folders.First());
+            Assert.AreEqual("\"def gh/**/*\"", folders.First());
+        }
+
+        [TestMethod]
+        public void Get_Exclusion_Folders_From_VcxProject_Without_sonarbuild() {
+            Project proj = new Project();
+            proj.AddItem("ClCompile", @"f.cpp");
+            proj.AddItem("ClCompile", @"abc\a.cpp");
+            proj.AddItem("ClCompile", @"123\567\1.cpp");
+            Mock<VcxprojParser> parser = new Mock<VcxprojParser>(proj);
+            parser.Setup(m => m.GetSubDirsInProjectFolders()).Returns(new List<String> { "abc", "def gh", "123", "sonarbuild_haha" });
+
+            var folders = parser.Object.GetExclusionFolders();
+            Assert.AreEqual(1, folders.Count());
+            Assert.AreEqual("\"def gh/**/*\"", folders.First());
         }
 
         [TestMethod]
