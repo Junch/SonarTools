@@ -38,7 +38,7 @@ namespace SonarConsole {
 
         static void Main(string[] args) {
             RunnerSetting setting = GetSettingWithConfigFile(args);
-            
+
             SonarRunnerManager pm = new SonarRunnerManager(setting);
             Stopwatch timer = new Stopwatch();
             timer.Start();
