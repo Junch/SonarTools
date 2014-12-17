@@ -37,6 +37,8 @@ namespace SonarConsole {
         }
 
         static void Main(string[] args) {
+            AppDomain.CurrentDomain.UnhandledException += CrashDumper.CurrentDomain_UnhandledException;
+
             RunnerSetting setting = GetSettingWithConfigFile(args);
 
             SonarRunnerManager pm = new SonarRunnerManager(setting);
