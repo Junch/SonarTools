@@ -83,6 +83,14 @@ namespace SonarTools.Util {
             }
         }
 
+        private bool IsVcxproj(FileInfo fi) {
+            return 0 == String.Compare(fi.Extension, ".vcxproj", true);
+        }
+
+        private bool IsCsproj(FileInfo fi) {
+            return 0 == String.Compare(fi.Extension, ".csproj", true);
+        }
+
         private void Traverse(string sPathName, List<ProjectSetting> arr) {
             Queue<string> pathQueue = new Queue<string>();
             pathQueue.Enqueue(sPathName);
@@ -93,11 +101,13 @@ namespace SonarTools.Util {
                 }
 
                 foreach (FileInfo fi in diParent.GetFiles()) {
-                    if (0 == String.Compare(fi.Extension, ".vcxproj", true)) {
+                    if (IsVcxproj(fi) || IsCsproj(fi)) {
                         ProcessFile(fi, arr);
-                    }
+                    } 
                 }
             }
+
+            Console.WriteLine(arr.Count);
         }
 
         private void ProcessFile(FileInfo fi, List<ProjectSetting> arr) {
@@ -105,19 +115,22 @@ namespace SonarTools.Util {
             String fileName = Path.GetFileName(fi.FullName);
 
             foreach (DirectoryInfo di in dir.GetDirectories()) {
-                if (di.Name.StartsWith("sonarbuild_" + fileName)) {
-                    var proj = new ProjectSetting() {
+                ProjectSetting proj = null;
+
+                if (IsVcxproj(fi) && di.Name.StartsWith("sonarbuild_" + fileName, StringComparison.OrdinalIgnoreCase) && !di.Name.EndsWith("_work")) {
+                    proj = new ProjectSetting() {
                         Filepath = fi.FullName,
                         BuildWrapper = di.Name
                     };
+                } else if (IsCsproj(fi)) {
+                    proj = new ProjectSetting() {
+                        Filepath = fi.FullName
+                    };
+                }
 
-                    var a = from item in arr
-                            where item.Filepath == fi.FullName
-                            select item;
-
-                    if (a.Count() == 0) {
-                        arr.Add(proj);
-                    } 
+                if (proj != null) {
+                    arr.Add(proj);
+                    break;
                 }
             }
         }
