@@ -2,6 +2,7 @@
 using System.Linq;
 using SonarTools.Runner;
 using Microsoft.Build.Evaluation;
+using System.IO;
 
 namespace SonarTools.Parser {
     public class ProjectParser {
@@ -50,14 +51,16 @@ namespace SonarTools.Parser {
                 runner = new CommercialCppRunner(projectPath, setting.Branch);
                 if (String.IsNullOrEmpty(setting.BuildWrapper)) {
                     runner["cfamily.library.directories"] = parser.IncludeDirectoriesJoined;
+                    runner["working.directory"] = Path.GetFileName(projectPath) + "_work";
                 } else {
                     runner["cfamily.build-wrapper-output"] = ps.BuildWrapper;
                     runner["working.directory"] = ps.BuildWrapper + "_work";
-                    var dirs = parser.GetExclusionFolders();
+                }
 
-                    if (dirs != null && dirs.Count() > 0) {
-                        runner["exclusions"] = String.Join(",", dirs.ToArray());
-                    }
+                var dirs = parser.GetExclusionFolders();
+
+                if (dirs != null && dirs.Count() > 0) {
+                    runner["exclusions"] = String.Join(",", dirs.ToArray());
                 }
             } else {
                 runner = new CommunityCppRunner(projectPath, setting.Branch);

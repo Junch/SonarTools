@@ -107,7 +107,7 @@ namespace SonarTools.Util {
                 }
             }
 
-            Console.WriteLine(arr.Count);
+            Console.WriteLine("{0} projecs are added from {1}", arr.Count, sPathName);
         }
 
         private void ProcessFile(FileInfo fi, List<ProjectSetting> arr) {

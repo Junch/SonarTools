@@ -244,6 +244,7 @@ namespace SonarTools.Test {
             vcParser.Setup(m => m.IncludeDirectories).Returns(new String[]{
                 @"C:\Test\Include"
             });
+            vcParser.Setup(m => m.GetSubDirsInProjectFolders()).Returns(new List<String> {"unittests"});
 
             // Create an ProjectParser instance
             RunnerSetting setting = new RunnerSetting() {
@@ -255,10 +256,12 @@ namespace SonarTools.Test {
             var r = po.Invoke("ParseCpp", vcParser.Object, new ProjectSetting()) as CommercialCppRunner;
 
             Assert.AreEqual(vcParser.Object.IncludeDirectoriesJoined, r["cfamily.library.directories"]);
+            Assert.AreEqual("test.vcxproj_work", r["working.directory"]);
+            Assert.AreEqual("\"unittests/**/*\"", r["exclusions"], true);
         }
 
         [TestMethod]
-        public void ParseCpp_Commercial_With_BuildWrap() {
+        public void ParseCpp_Commercial_With_BuildWrapper() {
             // Mock the VcxProjParser
             Project pj = new Project();
             pj.FullPath = @"test2.vcxproj";
@@ -266,7 +269,7 @@ namespace SonarTools.Test {
             vcParser.Setup(m => m.IncludeDirectories).Returns(new String[]{
                 @"C:\Test\Include"
             });
-            vcParser.Setup(m => m.GetSubDirsInProjectFolders()).Returns(new List<String>{});
+            vcParser.Setup(m => m.GetSubDirsInProjectFolders()).Returns(new List<String> {"unittests"});
 
             // Create an ProjectParser instance
             RunnerSetting setting = new RunnerSetting() {
@@ -279,6 +282,8 @@ namespace SonarTools.Test {
             var r = po.Invoke("ParseCpp", vcParser.Object, new ProjectSetting {BuildWrapper ="abc" }) as CommercialCppRunner;
 
             Assert.AreEqual("abc", r["cfamily.build-wrapper-output"]);
+            Assert.AreEqual("abc_work", r["working.directory"]);
+            Assert.AreEqual("\"unittests/**/*\"", r["exclusions"], true);
         }
 
         [TestMethod]
