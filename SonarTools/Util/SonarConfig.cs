@@ -38,6 +38,7 @@ namespace SonarTools.Util {
             }
             setting.BuildWrapper = (String)eBranch.Attribute("BuildWrapper") ?? setting.BuildWrapper;
             setting.MaxHeapSize = (String)eBranch.Attribute("MaxHeapSize") ?? setting.MaxHeapSize;
+            setting.Views = (String)eBranch.Attribute("Views");
 
             var type = (String)eBranch.Attribute("CppType");
             if (type != null && String.Compare(type, "commerical", true) == 0) {
@@ -48,6 +49,8 @@ namespace SonarTools.Util {
 
             GetDataFromProjects(eBranch.Element("Projects"), setting, projects);
             GetDataFromFolders(eBranch.Element("Folders"), projects);
+
+            Console.WriteLine("{0} projecs are added.", projects.Count);
 
             setting.Projects = projects.ToArray();
             return setting;
@@ -106,8 +109,6 @@ namespace SonarTools.Util {
                     } 
                 }
             }
-
-            Console.WriteLine("{0} projecs are added from {1}", arr.Count, sPathName);
         }
 
         private void ProcessFile(FileInfo fi, List<ProjectSetting> arr) {

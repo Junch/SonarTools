@@ -15,7 +15,7 @@ namespace SonarTools.Runner
         private Dictionary<String, String> properties = new Dictionary<String, String>();
         public readonly String FullFilePath;
         public readonly String Branch;
-        private StreamWriter logWriter;
+        protected StreamWriter logWriter;
 
         public SonarRunner(String fullFilePath, String branch) {
             this.FullFilePath = fullFilePath;
@@ -54,7 +54,7 @@ namespace SonarTools.Runner
             }
         }
 
-        public String LogFilepath {
+        public virtual String LogFilepath {
             get {
                 String file = Path.GetFileName(FullFilePath);
                 return String.Format("{0}\\{1}.log", DirectoryName, file);
@@ -79,9 +79,11 @@ namespace SonarTools.Runner
                 setting.Add(String.Format("-Dsonar.{0}={1}", propName, pair.Value));
             }
 
-            setting.Add(String.Format("-Dsonar.{0}={1}", "projectKey", ProjectKey));
-            setting.Add(String.Format("-Dsonar.{0}={1}", "projectName", DepotName));
-            setting.Add(String.Format("-Dsonar.{0}={1}", "sources", "."));
+            if (!IsView()) {
+                setting.Add(String.Format("-Dsonar.{0}={1}", "projectKey", ProjectKey));
+                setting.Add(String.Format("-Dsonar.{0}={1}", "projectName", DepotName));
+                setting.Add(String.Format("-Dsonar.{0}={1}", "sources", "."));
+            }
 
             return setting;
         }
@@ -99,7 +101,12 @@ namespace SonarTools.Runner
         public bool RunSonarCmd(String runnerHome) {
             // -e -X debug parameter
             String arguments = String.Format("/c {0}/bin/sonar-runner.bat {1}", runnerHome, SonarCmdArguments);
-            WriteLog(String.Format("Sonar-runner {0}", SonarCmdArguments));
+            if (IsView()) {
+                arguments = String.Format("/c {0}/bin/sonar-runner.bat views {1}", runnerHome, SonarCmdArguments);
+                WriteLog(String.Format("Sonar-runner views {0}", SonarCmdArguments));
+            } else {
+                WriteLog(String.Format("Sonar-runner {0}", SonarCmdArguments));
+            }
 
             ProcessStartInfo psi = new ProcessStartInfo();
             psi.FileName = "cmd.exe";
@@ -148,7 +155,7 @@ namespace SonarTools.Runner
             // To be overridden by Subclass
         }
 
-        protected virtual void PosRun() {
+        protected virtual void PostRun() {
             // To be overridden by Subclass
         }
 
@@ -158,6 +165,7 @@ namespace SonarTools.Runner
             const int MAX_PATH = 260;
             if (LogFilepath.Length > MAX_PATH) {
                 Console.WriteLine("Error: The path {0} is too long", LogFilepath);
+                return;
             }
 
             using (logWriter = File.CreateText(LogFilepath)) {
@@ -166,7 +174,7 @@ namespace SonarTools.Runner
                 System.Console.WriteLine("==> {0}", DepotName);
                 PreRun();
                 bool bSuccess = RunSonarCmd(runnerHome);
-                PosRun();
+                PostRun();
                 if (bSuccess) {
                     System.Console.WriteLine("<== {0}", DepotName);
                 } else {
@@ -193,6 +201,10 @@ namespace SonarTools.Runner
 
             var logLink = String.Format("{0}/{1}", SymbolLinkLogFolder, filename);
             return CreateSymbolicLink(logLink, fullfilePath, SymbolicLink.File);
+        }
+
+        protected virtual bool IsView() {
+            return false;
         }
     }
 }

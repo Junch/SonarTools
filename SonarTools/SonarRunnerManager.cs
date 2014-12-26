@@ -26,6 +26,7 @@ namespace SonarTools {
         public int ThreadNumber = 1;
         public String Branch;
         public String RunnerHome;
+        public String Views;
         public ProjectSetting[] Projects;
         public String MaxHeapSize = "512m";
     }
@@ -68,6 +69,8 @@ namespace SonarTools {
             }
 
             Task.WaitAll(tasks.ToArray());
+
+            ComputingViews();
         }
 
         private void IncreaseHeapsize() {
@@ -76,6 +79,13 @@ namespace SonarTools {
 
             if (Environment.GetEnvironmentVariable(envName) == null) { 
                 Environment.SetEnvironmentVariable(envName, envValue);
+            }
+        }
+
+        private void ComputingViews() {
+            if (!String.IsNullOrEmpty(setting.Views)) {
+                SonarRunner runner = new ViewRunner(setting.Views);
+                runner.Run(setting.RunnerHome);
             }
         }
     }

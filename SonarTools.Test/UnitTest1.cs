@@ -35,6 +35,16 @@ namespace SonarTools.Test {
         }
 
         [TestMethod]
+        public void Generate_Setting_From_Views() {
+            SonarRunner runner = new ViewRunner("View1");
+            var setting = runner.GetProperties();
+            setting.Sort();
+
+            Assert.AreEqual(1, setting.Count);
+            Assert.AreEqual("-Dsonar.views.list=View1", setting[0]);
+        }
+
+        [TestMethod]
         public void Get_AdditionalInclude_Directories_From_XML() {
             // Arrange
             string text =
@@ -326,7 +336,7 @@ namespace SonarTools.Test {
         public void Read_Normal_XML_Config_File() {
             String text =
             @"<Settings>
-              <Branch Id=""Main"" Depot=""$AutoCAD/main"" RunnerHome=""D:/Bin"" ThreadNumber=""4"" CppType=""Commerical"" MaxHeapSize=""2G"">
+              <Branch Id=""Main"" Depot=""$AutoCAD/main"" RunnerHome=""D:/Bin"" ThreadNumber=""4"" CppType=""Commerical"" MaxHeapSize=""2G"" Views=""view1,view2"">
                   <Projects>
                     <Project>C:\project1.vcxproj</Project>
                     <Project>D:\project2.csproj</Project>
@@ -344,6 +354,7 @@ namespace SonarTools.Test {
             Assert.AreEqual(4, setting.ThreadNumber);
             Assert.AreEqual(CppPluginType.kCppCommercial, setting.CppType);
             Assert.AreEqual("2G", setting.MaxHeapSize);
+            Assert.AreEqual("view1,view2", setting.Views);
             Assert.AreEqual(@"C:\project1.vcxproj", setting.Projects[0].Filepath);
             Assert.AreEqual(@"D:\project2.csproj", setting.Projects[1].Filepath);
         }

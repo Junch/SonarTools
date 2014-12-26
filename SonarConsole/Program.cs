@@ -25,14 +25,15 @@ namespace SonarConsole {
         }
 
         static RunnerSetting GetSettingWithConfigFile(String[] args) {
-            if (args.Length != 2) {
-                System.Console.WriteLine("Useage: SonarSonsole.exe demo.xml branchName");
+            if (args.Length != 3) {
+                System.Console.WriteLine("Useage: SonarSonsole.exe demo.xml branchName version");
                 Environment.Exit(1);
                 return null;
             }
             
             SonarConfig config = new SonarConfig();
             RunnerSetting setting = config.Read(args[0], args[1]);
+            setting.Version = args[2];
             return setting;
         }
 
@@ -40,7 +41,6 @@ namespace SonarConsole {
             AppDomain.CurrentDomain.UnhandledException += CrashDumper.CurrentDomain_UnhandledException;
 
             RunnerSetting setting = GetSettingWithConfigFile(args);
-
             SonarRunnerManager pm = new SonarRunnerManager(setting);
             Stopwatch timer = new Stopwatch();
             timer.Start();
